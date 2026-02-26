@@ -32,12 +32,14 @@ class EventSystem extends EventEmitter {
       this.logger.error('💥 Event system error:', error);
     });
     
-    // Set up event logging
-    this.onAny((eventName, ...args) => {
+    // Set up event logging by overriding emit
+    const originalEmit = this.emit.bind(this);
+    this.emit = (eventName, ...args) => {
       this._logEvent(eventName, args);
       this._updateStats(eventName);
       this._addToHistory(eventName, args);
-    });
+      return originalEmit(eventName, ...args);
+    };
     
     this.logger.info('✅ Event system ready');
     return true;
