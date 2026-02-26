@@ -7,7 +7,7 @@
 const winston = require('winston');
 const OpenAIProvider = require('./providers/openai-provider');
 const AnthropicProvider = require('./providers/anthropic-provider');
-const ConversationManager = require('./conversation/conversation-manager');
+const { ConversationManager } = require('./conversation/conversation-manager');
 const TokenManager = require('./conversation/token-manager');
 
 class LLMModule {
