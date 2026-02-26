@@ -2,7 +2,7 @@
   "version": "1.0.0",
   "firstRun": "2026-02-26T02:22:40.226Z",
   "modules": {
-    "enabled": [],
+    "enabled": ["llm"],
     "disabled": []
   },
   "security": {
