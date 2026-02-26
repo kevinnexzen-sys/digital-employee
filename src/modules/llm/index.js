@@ -7,6 +7,12 @@
 const winston = require('winston');
 const OpenAIProvider = require('./providers/openai-provider');
 const AnthropicProvider = require('./providers/anthropic-provider');
+const HuggingFaceProvider = require('./providers/huggingface-provider');
+const CohereProvider = require('./providers/cohere-provider');
+const ReplicateProvider = require('./providers/replicate-provider');
+const TogetherProvider = require('./providers/together-provider');
+const GroqProvider = require('./providers/groq-provider');
+const ProviderRouter = require('./providers/provider-router');
 const { ConversationManager } = require('./conversation/conversation-manager');
 const TokenManager = require('./conversation/token-manager');
 
@@ -21,6 +27,7 @@ class LLMModule {
     this.providers = new Map();
     this.activeProvider = null;
     this.fallbackProviders = [];
+    this.providerRouter = null;
     
     // Conversation management
     this.conversationManager = null;
@@ -60,12 +67,16 @@ class LLMModule {
       // Initialize providers
       await this._initializeProviders(config);
       
+      // Initialize provider router
+      this.providerRouter = new ProviderRouter(this.providers, config.routing || {});
+      
       // Set up event listeners
       this._setupEventListeners();
       
       // Validate at least one provider is available
       if (this.providers.size === 0) {
-        throw new Error('No LLM providers configured. Please set up OpenAI or Anthropic API keys.');
+        this.logger.warn('⚠️ No LLM providers configured. Please set up API keys for OpenAI, Anthropic, HuggingFace, Cohere, Replicate, Together AI, or Groq.');
+        // Don't throw error - allow graceful degradation
       }
       
       this.logger.info(`✅ LLM module ready with ${this.providers.size} providers`);
@@ -287,6 +298,104 @@ class LLMModule {
       this.logger.warn('⚠️  Anthropic API key not configured');
     }
     
+    // Initialize HuggingFace provider
+    const huggingfaceKey = this.engine.config.getSecret('huggingface.apiKey');
+    if (huggingfaceKey) {
+      try {
+        const huggingfaceProvider = new HuggingFaceProvider({
+          apiKey: huggingfaceKey,
+          ...config.huggingface
+        });
+        
+        await huggingfaceProvider.initialize();
+        this.providers.set('huggingface', huggingfaceProvider);
+        this.logger.info('✅ HuggingFace provider initialized');
+      } catch (error) {
+        this.logger.error('💥 HuggingFace provider initialization failed:', error);
+      }
+    } else {
+      this.logger.warn('⚠️  HuggingFace API key not configured');
+    }
+    
+    // Initialize Cohere provider
+    const cohereKey = this.engine.config.getSecret('cohere.apiKey');
+    if (cohereKey) {
+      try {
+        const cohereProvider = new CohereProvider({
+          apiKey: cohereKey,
+          model: config.cohere?.model || 'command',
+          ...config.cohere
+        });
+        
+        await cohereProvider.initialize();
+        this.providers.set('cohere', cohereProvider);
+        this.logger.info('✅ Cohere provider initialized');
+      } catch (error) {
+        this.logger.error('💥 Cohere provider initialization failed:', error);
+      }
+    } else {
+      this.logger.warn('⚠️  Cohere API key not configured');
+    }
+    
+    // Initialize Replicate provider
+    const replicateKey = this.engine.config.getSecret('replicate.apiKey');
+    if (replicateKey) {
+      try {
+        const replicateProvider = new ReplicateProvider({
+          apiKey: replicateKey,
+          ...config.replicate
+        });
+        
+        await replicateProvider.initialize();
+        this.providers.set('replicate', replicateProvider);
+        this.logger.info('✅ Replicate provider initialized');
+      } catch (error) {
+        this.logger.error('💥 Replicate provider initialization failed:', error);
+      }
+    } else {
+      this.logger.warn('⚠️  Replicate API key not configured');
+    }
+    
+    // Initialize Together AI provider
+    const togetherKey = this.engine.config.getSecret('together.apiKey');
+    if (togetherKey) {
+      try {
+        const togetherProvider = new TogetherProvider({
+          apiKey: togetherKey,
+          model: config.together?.model || 'meta-llama/Llama-2-70b-chat-hf',
+          ...config.together
+        });
+        
+        await togetherProvider.initialize();
+        this.providers.set('together', togetherProvider);
+        this.logger.info('✅ Together AI provider initialized');
+      } catch (error) {
+        this.logger.error('💥 Together AI provider initialization failed:', error);
+      }
+    } else {
+      this.logger.warn('⚠️  Together AI API key not configured');
+    }
+    
+    // Initialize Groq provider
+    const groqKey = this.engine.config.getSecret('groq.apiKey');
+    if (groqKey) {
+      try {
+        const groqProvider = new GroqProvider({
+          apiKey: groqKey,
+          model: config.groq?.model || 'mixtral-8x7b-32768',
+          ...config.groq
+        });
+        
+        await groqProvider.initialize();
+        this.providers.set('groq', groqProvider);
+        this.logger.info('✅ Groq provider initialized');
+      } catch (error) {
+        this.logger.error('💥 Groq provider initialization failed:', error);
+      }
+    } else {
+      this.logger.warn('⚠️  Groq API key not configured');
+    }
+    
     // Set active provider
     this._selectActiveProvider(config);
   }
@@ -426,6 +535,33 @@ class LLMModule {
   }
 
   async _generateResponse(conversation, options = {}) {
+    // Use provider router for intelligent routing
+    if (this.providerRouter && this.providers.size > 0) {
+      try {
+        const result = await this.providerRouter.execute('chat', {
+          messages: conversation.getMessages()
+        }, options);
+        
+        // Update provider usage stats
+        this._updateProviderStats(result.provider, result);
+        
+        return {
+          success: true,
+          content: result.content,
+          provider: result.provider,
+          tokens: result.tokens,
+          cost: result.cost,
+          model: result.model,
+          routing: result.routing
+        };
+        
+      } catch (error) {
+        this.logger.error('💥 Provider router failed:', error);
+        // Fall back to manual provider selection
+      }
+    }
+    
+    // Fallback to manual provider selection
     const providers = [this.activeProvider, ...this.fallbackProviders];
     
     for (const providerName of providers) {

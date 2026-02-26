@@ -1,0 +1,77 @@
+{
+  "name": "kevinjr-codegen-module",
+  "version": "1.0.0",
+  "description": "Multi-AI powered code generation module for KevinJr",
+  "main": "index.js",
+  "author": "KevinJr Team",
+  "license": "MIT",
+  "capabilities": [
+    "Full-stack application generation",
+    "Multi-language code generation",
+    "Framework-specific scaffolding",
+    "Database schema design",
+    "API endpoint generation",
+    "Component library creation",
+    "Test suite generation",
+    "Code validation and optimization",
+    "Multi-AI code review",
+    "Template-based generation"
+  ],
+  "permissions": [
+    "filesystem:write",
+    "network:external",
+    "llm:access"
+  ],
+  "dependencies": {
+    "fs-extra": "^11.1.0",
+    "winston": "^3.11.0",
+    "handlebars": "^4.7.8",
+    "prettier": "^3.0.0",
+    "eslint": "^8.50.0"
+  },
+  "kevinjrDependencies": [
+    "llm"
+  ],
+  "config": {
+    "outputDirectory": "./generated",
+    "templateDirectory": "./templates",
+    "validation": {
+      "enabled": true,
+      "multiAI": true,
+      "rules": ["security", "performance", "best-practices"]
+    },
+    "generation": {
+      "useAI": true,
+      "multiProvider": true,
+      "optimization": true,
+      "documentation": true
+    },
+    "templates": {
+      "autoUpdate": true,
+      "customTemplates": true
+    },
+    "supportedLanguages": [
+      "javascript",
+      "typescript", 
+      "python",
+      "go",
+      "rust",
+      "java",
+      "cpp"
+    ],
+    "frameworks": {
+      "frontend": ["react", "vue", "angular", "svelte"],
+      "backend": ["express", "fastapi", "gin", "actix", "spring"],
+      "mobile": ["react-native", "flutter"],
+      "desktop": ["electron", "tauri"]
+    },
+    "databases": [
+      "postgresql",
+      "mysql", 
+      "mongodb",
+      "redis",
+      "sqlite"
+    ]
+  }
+}
+
