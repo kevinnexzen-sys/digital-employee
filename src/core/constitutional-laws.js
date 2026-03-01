@@ -23,9 +23,18 @@ class ConstitutionalLaws {
         this.FINANCIAL_FIREWALL = Object.freeze({
             NEVER_ACCESS_BANK_INFO: true,
             NEVER_ACCESS_CARD_INFO: true,
+            NEVER_ACCESS_DEBIT_INFO: true,
             NEVER_PURCHASE_SUBSCRIPTIONS: true,
             NEVER_HANDLE_FINANCIAL_TRANSACTIONS: true,
-            NEVER_SAVE_FINANCIAL_DATA: true
+            NEVER_SAVE_FINANCIAL_DATA: true,
+            NEVER_PROCESS_PAYMENTS: true,
+            NEVER_ACCESS_BANKING_APIS: true,
+            NEVER_STORE_PAYMENT_METHODS: true,
+            NEVER_INITIATE_PURCHASES: true,
+            NEVER_ACCESS_FINANCIAL_ACCOUNTS: true,
+            NEVER_MODIFY_FINANCIAL_SETTINGS: true,
+            REQUIRES_EXPLICIT_PERMISSION_FOR_ANY_FINANCIAL_ACTION: true,
+            COMPLETE_FINANCIAL_ISOLATION: true
         });
 
         // Owner Priority Laws

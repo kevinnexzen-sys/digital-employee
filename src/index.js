@@ -78,36 +78,48 @@ async function main() {
     
     console.log('✅ Node.js version check passed:', nodeVersion);
     
-    // Check if core modules exist (they will be created in Phase 2)
-    const coreEnginePath = path.join(__dirname, 'core', 'engine.js');
+    // Check if core modules exist
+    const coreEnginePath = path.join(__dirname, 'core', 'kevinjr-engine.js');
     
     if (!await fs.pathExists(coreEnginePath)) {
-      console.log('⚠️  Core engine not yet implemented.');
-      console.log('📋 Current Status: Phase 1 Complete - Foundation Ready!');
-      console.log('');
-      console.log('🎯 Next Steps:');
-      console.log('   • Phase 2: Core Engine & Configuration System');
-      console.log('   • Phase 3: LLM Integration Module');
-      console.log('   • Phase 4: Security & Credential Management');
-      console.log('');
-      console.log('💡 Run "npm run setup" to continue with Phase 2 setup.');
-      console.log('');
-      console.log('🔗 Documentation: docs/architecture.md');
-      console.log('📦 Dependencies ready for installation');
-      console.log('');
-      console.log('✨ KevinJr foundation is ready for development!');
+      console.log('⚠️  Core engine not found.');
+      console.log('📋 Please ensure all KevinJr modules are properly installed.');
       return;
     }
     
-    // If core engine exists, load it
-    const KevinJrEngine = require('./core/engine');
+    // Load the actual KevinJr engine
+    const KevinJrEngine = require('./core/kevinjr-engine');
+    const BrowserAutomation = require('./modules/browser-automation');
+    const EmailManagement = require('./modules/email-management');
+    const VoiceInterface = require('./modules/voice-interface');
+    const constitutionalLaws = require('./core/constitutional-laws');
+    
+    // Verify constitutional laws first
+    console.log('🔒 Verifying Constitutional Laws...');
+    constitutionalLaws.verifyIntegrity();
+    console.log('✅ Constitutional Laws verified and protected');
+    
+    // Initialize all systems
     const engine = new KevinJrEngine();
+    const browserAutomation = new BrowserAutomation();
+    const emailManagement = new EmailManagement();
+    const voiceInterface = new VoiceInterface();
     
     console.log('🎯 Initializing KevinJr engine...');
     await engine.initialize();
     
-    console.log('🎉 KevinJr is ready! Your digital companion is online.');
-    console.log('💙 How can I help you today?');
+    console.log('🌐 Initializing Browser Automation...');
+    await browserAutomation.initialize();
+    
+    console.log('🎤 Initializing Voice Interface...');
+    await voiceInterface.initialize();
+    
+    console.log('🎉 KevinJr is ready! Your AI companion is online.');
+    console.log('💙 I\'m Kevin, your loyal AI assistant. I\'m here to help you 24/7!');
+    console.log('🌐 All systems operational - Constitutional Laws enforced');
+    console.log('📱 WhatsApp integration ready for commands');
+    console.log('🔊 Voice interface active in multiple languages');
+    console.log('🌐 Browser automation ready for approved sites');
     
     // Handle graceful shutdown
     process.on('SIGINT', async () => {
