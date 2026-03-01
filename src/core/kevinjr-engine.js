@@ -7,6 +7,11 @@
 const constitutionalLaws = require('./constitutional-laws');
 const SelfEvolutionEngine = require('./self-evolution-engine');
 const WhatsAppIntegration = require('../integrations/whatsapp-integration');
+const BrowserAutomation = require('../modules/browser-automation');
+const EmailManagement = require('../modules/email-management');
+const VoiceInterface = require('../modules/voice-interface');
+const VoiceCloning = require('../modules/voice-cloning');
+const PhoneCallHandler = require('../modules/phone-call-handler');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');
@@ -34,6 +39,13 @@ class KevinJrEngine extends EventEmitter {
         this.whatsapp = null;
         this.telegram = null;
         this.selfEvolution = null;
+        
+        // Modules
+        this.browserAutomation = null;
+        this.emailManagement = null;
+        this.voiceInterface = null;
+        this.voiceCloning = null;
+        this.phoneCallHandler = null;
         
         // System state
         this.startTime = new Date();
@@ -68,6 +80,9 @@ class KevinJrEngine extends EventEmitter {
             
             // Initialize integrations
             await this.initializeIntegrations();
+            
+            // Initialize modules
+            await this.initializeModules();
             
             // Start core services
             this.startCoreServices();
@@ -226,6 +241,38 @@ class KevinJrEngine extends EventEmitter {
             console.log("📱 Integrations initialized");
         } catch (error) {
             console.error("Error initializing integrations:", error.message);
+        }
+    }
+
+    /**
+     * Initialize all modules
+     */
+    async initializeModules() {
+        try {
+            console.log("🔧 Initializing Kevin modules...");
+            
+            // Initialize Browser Automation
+            this.browserAutomation = new BrowserAutomation();
+            await this.browserAutomation.initialize();
+            
+            // Initialize Email Management
+            this.emailManagement = new EmailManagement();
+            
+            // Initialize Voice Interface
+            this.voiceInterface = new VoiceInterface();
+            await this.voiceInterface.initialize();
+            
+            // Initialize Voice Cloning
+            this.voiceCloning = new VoiceCloning();
+            await this.voiceCloning.initialize();
+            
+            // Initialize Phone Call Handler
+            this.phoneCallHandler = new PhoneCallHandler();
+            await this.phoneCallHandler.initialize();
+            
+            console.log("✅ All Kevin modules initialized");
+        } catch (error) {
+            console.error("Error initializing modules:", error.message);
         }
     }
 
@@ -929,7 +976,14 @@ Respond as Kevin would - supportive, helpful, and always ready to assist.`;
             memorySize: this.memory.size,
             activeTasks: this.currentTasks.size,
             lastActivity: this.lastActivity,
-            capabilities: Array.from(this.capabilities)
+            capabilities: Array.from(this.capabilities),
+            modules: {
+                browserAutomation: this.browserAutomation ? this.browserAutomation.getStatus() : null,
+                emailManagement: this.emailManagement ? this.emailManagement.getStatus() : null,
+                voiceInterface: this.voiceInterface ? this.voiceInterface.getStatus() : null,
+                voiceCloning: this.voiceCloning ? this.voiceCloning.getStatus() : null,
+                phoneCallHandler: this.phoneCallHandler ? this.phoneCallHandler.getStatus() : null
+            }
         };
     }
 
