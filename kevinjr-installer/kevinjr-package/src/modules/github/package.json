@@ -1,0 +1,64 @@
+{
+  "name": "kevinjr-github-module",
+  "version": "1.0.0",
+  "description": "GitHub integration and repository management module for KevinJr",
+  "main": "index.js",
+  "author": "KevinJr Team",
+  "license": "MIT",
+  "capabilities": [
+    "Repository creation and management",
+    "Automated CI/CD pipeline setup",
+    "Branch and pull request management",
+    "Security scanning configuration",
+    "Documentation generation",
+    "Issue and project management",
+    "Code review automation",
+    "Dependency management"
+  ],
+  "permissions": [
+    "network:external",
+    "filesystem:write",
+    "github:api"
+  ],
+  "dependencies": {
+    "@octokit/rest": "^20.0.0",
+    "winston": "^3.11.0",
+    "js-yaml": "^4.1.0",
+    "handlebars": "^4.7.8"
+  },
+  "kevinjrDependencies": [],
+  "config": {
+    "defaultBranch": "main",
+    "autoSetupCI": true,
+    "enableSecurity": true,
+    "workflows": {
+      "node": {
+        "test": true,
+        "build": true,
+        "deploy": true,
+        "security": true
+      },
+      "python": {
+        "test": true,
+        "lint": true,
+        "deploy": true,
+        "security": true
+      }
+    },
+    "security": {
+      "dependabot": true,
+      "codeql": true,
+      "secretScanning": true,
+      "vulnerabilityAlerts": true
+    },
+    "templates": {
+      "readme": true,
+      "contributing": true,
+      "codeOfConduct": true,
+      "license": true,
+      "issueTemplates": true,
+      "prTemplate": true
+    }
+  }
+}
+

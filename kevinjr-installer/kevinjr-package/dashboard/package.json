@@ -1,0 +1,33 @@
+{
+  "name": "kevinjr-dashboard",
+  "version": "1.0.0",
+  "description": "Interactive dashboard for KevinJr AI Assistant",
+  "main": "server/dashboard-server.js",
+  "scripts": {
+    "start": "node server/dashboard-server.js",
+    "dev": "nodemon server/dashboard-server.js",
+    "build": "echo 'Dashboard is ready!'",
+    "test": "echo 'Dashboard tests coming soon!'"
+  },
+  "keywords": [
+    "kevinjr",
+    "dashboard",
+    "ai",
+    "assistant",
+    "websocket",
+    "real-time"
+  ],
+  "author": "KevinJr Team",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2",
+    "ws": "^8.14.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
+

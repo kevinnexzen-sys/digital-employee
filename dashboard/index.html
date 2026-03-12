@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kevin Jr - AI Companion Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="dashboard-container">
+        <!-- Header -->
+        <header class="dashboard-header">
+            <div class="header-left">
+                <div class="logo">
+                    <i class="fas fa-robot"></i>
+                    <h1>Kevin Jr</h1>
+                </div>
+                <div class="status-indicator" id="status-indicator">
+                    <span class="status-dot"></span>
+                    <span class="status-text">Initializing...</span>
+                </div>
+            </div>
+            <div class="header-right">
+                <div class="system-info">
+                    <span id="uptime">Uptime: --</span>
+                    <span id="health">Health: --</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="dashboard-main">
+            <!-- Sidebar -->
+            <aside class="sidebar">
+                <nav class="nav-menu">
+                    <div class="nav-section">
+                        <h3>Chat & Commands</h3>
+                        <button class="nav-item active" data-tab="chat">
+                            <i class="fas fa-comments"></i>
+                            Chat with Kevin
+                        </button>
+                        <button class="nav-item" data-tab="voice">
+                            <i class="fas fa-microphone"></i>
+                            Voice Interface
+                        </button>
+                    </div>
+                    
+                    <div class="nav-section">
+                        <h3>Voice Cloning</h3>
+                        <button class="nav-item" data-tab="voice-setup">
+                            <i class="fas fa-user-secret"></i>
+                            Voice Setup
+                        </button>
+                        <button class="nav-item" data-tab="phone-handler">
+                            <i class="fas fa-phone"></i>
+                            Phone Handler
+                        </button>
+                    </div>
+                    
+                    <div class="nav-section">
+                        <h3>Automation</h3>
+                        <button class="nav-item" data-tab="browser">
+                            <i class="fas fa-globe"></i>
+                            Browser Control
+                        </button>
+                        <button class="nav-item" data-tab="email">
+                            <i class="fas fa-envelope"></i>
+                            Email Management
+                        </button>
+                    </div>
+                    
+                    <div class="nav-section">
+                        <h3>System</h3>
+                        <button class="nav-item" data-tab="status">
+                            <i class="fas fa-chart-line"></i>
+                            System Status
+                        </button>
+                        <button class="nav-item" data-tab="settings">
+                            <i class="fas fa-cog"></i>
+                            Settings
+                        </button>
+                    </div>
+                </nav>
+            </aside>
+
+            <!-- Content Area -->
+            <main class="content-area">
+                <!-- Chat Tab -->
+                <div class="tab-content active" id="chat-tab">
+                    <div class="chat-container">
+                        <div class="chat-header">
+                            <h2><i class="fas fa-comments"></i> Chat with Kevin</h2>
+                            <div class="chat-controls">
+                                <button id="clear-chat" class="btn btn-secondary">
+                                    <i class="fas fa-trash"></i> Clear
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-messages" id="chat-messages">
+                            <div class="message assistant">
+                                <div class="message-avatar">
+                                    <i class="fas fa-robot"></i>
+                                </div>
+                                <div class="message-content">
+                                    <div class="message-text">
+                                        Hello! I'm Kevin, your AI companion. I'm here to help you with anything you need. You can give me tasks, ask questions, or just chat! 💙
+                                    </div>
+                                    <div class="message-time">Just now</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="chat-input-container">
+                            <div class="chat-input-wrapper">
+                                <input type="text" id="chat-input" placeholder="Type your message or command here..." autocomplete="off">
+                                <button id="send-message" class="btn btn-primary">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                            <div class="quick-commands">
+                                <button class="quick-cmd" data-cmd="What can you do?">What can you do?</button>
+                                <button class="quick-cmd" data-cmd="Check system status">System Status</button>
+                                <button class="quick-cmd" data-cmd="Help me with email">Email Help</button>
+                                <button class="quick-cmd" data-cmd="Browse a website">Browse Web</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voice Interface Tab -->
+                <div class="tab-content" id="voice-tab">
+                    <div class="voice-container">
+                        <div class="voice-header">
+                            <h2><i class="fas fa-microphone"></i> Voice Interface</h2>
+                        </div>
+                        
+                        <div class="voice-controls">
+                            <div class="voice-status">
+                                <div class="voice-indicator" id="voice-indicator">
+                                    <i class="fas fa-microphone-slash"></i>
+                                    <span>Voice interface ready</span>
+                                </div>
+                            </div>
+                            
+                            <div class="voice-buttons">
+                                <button id="start-listening" class="btn btn-primary btn-large">
+                                    <i class="fas fa-microphone"></i>
+                                    Start Listening
+                                </button>
+                                <button id="stop-listening" class="btn btn-secondary btn-large" disabled>
+                                    <i class="fas fa-stop"></i>
+                                    Stop Listening
+                                </button>
+                            </div>
+                            
+                            <div class="voice-test">
+                                <h3>Test Voice Output</h3>
+                                <div class="voice-test-controls">
+                                    <input type="text" id="voice-test-text" placeholder="Enter text for Kevin to speak..." value="Hello! This is Kevin, your AI assistant.">
+                                    <select id="voice-language">
+                                        <option value="en">English</option>
+                                        <option value="es">Spanish</option>
+                                        <option value="bn">Bangla</option>
+                                        <option value="ar">Arabic</option>
+                                        <option value="ur">Urdu</option>
+                                        <option value="hi">Hindi</option>
+                                    </select>
+                                    <button id="test-voice" class="btn btn-primary">
+                                        <i class="fas fa-volume-up"></i>
+                                        Speak
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Voice Setup Tab -->
+                <div class="tab-content" id="voice-setup-tab">
+                    <div class="voice-setup-container">
+                        <div class="voice-setup-header">
+                            <h2><i class="fas fa-user-secret"></i> Voice Cloning Setup</h2>
+                            <p>Set up voice cloning to enable Kevin to speak in your voice for phone calls</p>
+                        </div>
+                        
+                        <div class="setup-steps">
+                            <!-- Step 1: Legal Consent -->
+                            <div class="setup-step" id="consent-step">
+                                <div class="step-header">
+                                    <div class="step-number">1</div>
+                                    <h3>Legal Consent</h3>
+                                    <div class="step-status" id="consent-status">
+                                        <i class="fas fa-clock"></i> Required
+                                    </div>
+                                </div>
+                                
+                                <div class="step-content">
+                                    <div class="consent-form">
+                                        <div class="consent-text">
+                                            <h4>Voice Cloning Consent Agreement</h4>
+                                            <p>I hereby give consent for Kevin Jr AI system to:</p>
+                                            <ul>
+                                                <li>Clone my voice for business phone call handling</li>
+                                                <li>Use my cloned voice only with my explicit approval</li>
+                                                <li>Store voice training data securely and encrypted</li>
+                                                <li>Allow me to revoke this consent at any time</li>
+                                            </ul>
+                                            <p><strong>Restrictions:</strong></p>
+                                            <ul>
+                                                <li>Only for owner's business phone calls</li>
+                                                <li>Never for deceptive purposes</li>
+                                                <li>Owner maintains full control</li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <div class="consent-inputs">
+                                            <div class="input-group">
+                                                <label for="owner-name">Full Name:</label>
+                                                <input type="text" id="owner-name" placeholder="Enter your full name">
+                                            </div>
+                                            <div class="input-group">
+                                                <label for="consent-date">Date:</label>
+                                                <input type="date" id="consent-date">
+                                            </div>
+                                            <div class="input-group">
+                                                <label for="digital-signature">Digital Signature:</label>
+                                                <input type="text" id="digital-signature" placeholder="Type your name as digital signature">
+                                            </div>
+                                            <div class="checkbox-group">
+                                                <input type="checkbox" id="consent-checkbox">
+                                                <label for="consent-checkbox">I understand and agree to the terms above</label>
+                                            </div>
+                                        </div>
+                                        
+                                        <button id="give-consent" class="btn btn-primary" disabled>
+                                            <i class="fas fa-check"></i>
+                                            Give Legal Consent
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 2: Voice Training -->
+                            <div class="setup-step" id="training-step">
+                                <div class="step-header">
+                                    <div class="step-number">2</div>
+                                    <h3>Voice Training</h3>
+                                    <div class="step-status" id="training-status">
+                                        <i class="fas fa-lock"></i> Locked
+                                    </div>
+                                </div>
+                                
+                                <div class="step-content">
+                                    <div class="training-info">
+                                        <p>Record at least 5 audio samples of your voice to train the cloning model.</p>
+                                        <p><strong>Tips for best results:</strong></p>
+                                        <ul>
+                                            <li>Speak clearly and naturally</li>
+                                            <li>Use different sentences and emotions</li>
+                                            <li>Record in a quiet environment</li>
+                                            <li>Each sample should be 5-10 seconds</li>
+                                        </ul>
+                                    </div>
+                                    
+                                    <div class="training-samples">
+                                        <h4>Training Samples</h4>
+                                        <div class="sample-list" id="sample-list">
+                                            <!-- Samples will be added here -->
+                                        </div>
+                                        
+                                        <div class="sample-recorder">
+                                            <div class="recorder-controls">
+                                                <button id="start-recording" class="btn btn-primary">
+                                                    <i class="fas fa-microphone"></i>
+                                                    Start Recording
+                                                </button>
+                                                <button id="stop-recording" class="btn btn-secondary" disabled>
+                                                    <i class="fas fa-stop"></i>
+                                                    Stop Recording
+                                                </button>
+                                                <div class="recording-status" id="recording-status"></div>
+                                            </div>
+                                            
+                                            <div class="sample-text">
+                                                <label for="sample-transcription">What you'll say:</label>
+                                                <input type="text" id="sample-transcription" placeholder="Enter the text you'll speak">
+                                            </div>
+                                        </div>
+                                        
+                                        <button id="train-model" class="btn btn-success" disabled>
+                                            <i class="fas fa-brain"></i>
+                                            Train Voice Model
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Step 3: Voice Testing -->
+                            <div class="setup-step" id="testing-step">
+                                <div class="step-header">
+                                    <div class="step-number">3</div>
+                                    <h3>Voice Testing</h3>
+                                    <div class="step-status" id="testing-status">
+                                        <i class="fas fa-lock"></i> Locked
+                                    </div>
+                                </div>
+                                
+                                <div class="step-content">
+                                    <div class="voice-testing">
+                                        <p>Test your cloned voice to ensure quality before enabling phone calls.</p>
+                                        
+                                        <div class="test-controls">
+                                            <input type="text" id="test-cloned-text" placeholder="Enter text to test with your cloned voice" value="Hello, thank you for calling! This is Kevin speaking. How can I help you today?">
+                                            <button id="test-cloned-voice" class="btn btn-primary">
+                                                <i class="fas fa-play"></i>
+                                                Test Cloned Voice
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="voice-quality">
+                                            <h4>Voice Quality Assessment</h4>
+                                            <div class="quality-metrics" id="quality-metrics">
+                                                <!-- Quality metrics will be shown here -->
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Phone Handler Tab -->
+                <div class="tab-content" id="phone-handler-tab">
+                    <div class="phone-handler-container">
+                        <div class="phone-handler-header">
+                            <h2><i class="fas fa-phone"></i> Phone Call Handler</h2>
+                            <p>Manage phone calls with Kevin's cloned voice</p>
+                        </div>
+                        
+                        <div class="phone-controls">
+                            <div class="handler-status">
+                                <div class="status-card">
+                                    <h3>Handler Status</h3>
+                                    <div class="status-info" id="phone-status">
+                                        <div class="status-item">
+                                            <span class="label">Status:</span>
+                                            <span class="value" id="handler-status">Stopped</span>
+                                        </div>
+                                        <div class="status-item">
+                                            <span class="label">Active Calls:</span>
+                                            <span class="value" id="active-calls">0</span>
+                                        </div>
+                                        <div class="status-item">
+                                            <span class="label">Queued Calls:</span>
+                                            <span class="value" id="queued-calls">0</span>
+                                        </div>
+                                        <div class="status-item">
+                                            <span class="label">Max Concurrent:</span>
+                                            <span class="value" id="max-calls">5</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="handler-controls">
+                                <button id="start-phone-handler" class="btn btn-success btn-large">
+                                    <i class="fas fa-play"></i>
+                                    Start Phone Handler
+                                </button>
+                                <button id="stop-phone-handler" class="btn btn-danger btn-large" disabled>
+                                    <i class="fas fa-stop"></i>
+                                    Stop Phone Handler
+                                </button>
+                            </div>
+                            
+                            <div class="call-settings">
+                                <h3>Call Settings</h3>
+                                <div class="settings-grid">
+                                    <div class="setting-item">
+                                        <label for="max-concurrent">Max Concurrent Calls:</label>
+                                        <input type="number" id="max-concurrent" value="5" min="1" max="10">
+                                    </div>
+                                    <div class="setting-item">
+                                        <label for="default-language">Default Language:</label>
+                                        <select id="default-language">
+                                            <option value="en">English</option>
+                                            <option value="es">Spanish</option>
+                                            <option value="bn">Bangla</option>
+                                            <option value="ar">Arabic</option>
+                                            <option value="ur">Urdu</option>
+                                            <option value="hi">Hindi</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="call-history">
+                            <h3>Recent Calls</h3>
+                            <div class="call-list" id="call-list">
+                                <div class="call-item">
+                                    <div class="call-info">
+                                        <div class="caller-number">+1-555-0123</div>
+                                        <div class="call-time">2 minutes ago</div>
+                                    </div>
+                                    <div class="call-status">
+                                        <span class="status-badge completed">Completed</span>
+                                    </div>
+                                    <div class="call-duration">3:45</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Browser Tab -->
+                <div class="tab-content" id="browser-tab">
+                    <div class="browser-container">
+                        <div class="browser-header">
+                            <h2><i class="fas fa-globe"></i> Browser Automation</h2>
+                        </div>
+                        
+                        <div class="browser-controls">
+                            <div class="url-input">
+                                <input type="url" id="browser-url" placeholder="Enter website URL...">
+                                <input type="text" id="browser-purpose" placeholder="Purpose (optional)">
+                                <button id="navigate-site" class="btn btn-primary">
+                                    <i class="fas fa-arrow-right"></i>
+                                    Navigate
+                                </button>
+                            </div>
+                            
+                            <div class="browser-actions">
+                                <button id="take-screenshot" class="btn btn-secondary">
+                                    <i class="fas fa-camera"></i>
+                                    Screenshot
+                                </button>
+                                <button id="extract-data" class="btn btn-secondary">
+                                    <i class="fas fa-download"></i>
+                                    Extract Data
+                                </button>
+                                <button id="fill-form" class="btn btn-secondary">
+                                    <i class="fas fa-edit"></i>
+                                    Fill Form
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="browser-status" id="browser-status">
+                            <div class="status-info">
+                                <span>Status: Ready</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Email Tab -->
+                <div class="tab-content" id="email-tab">
+                    <div class="email-container">
+                        <div class="email-header">
+                            <h2><i class="fas fa-envelope"></i> Email Management</h2>
+                        </div>
+                        
+                        <div class="email-controls">
+                            <div class="email-providers">
+                                <button class="provider-btn" data-provider="gmail">
+                                    <i class="fab fa-google"></i>
+                                    Gmail
+                                </button>
+                                <button class="provider-btn" data-provider="outlook">
+                                    <i class="fab fa-microsoft"></i>
+                                    Outlook
+                                </button>
+                            </div>
+                            
+                            <div class="email-actions">
+                                <button id="read-emails" class="btn btn-primary">
+                                    <i class="fas fa-inbox"></i>
+                                    Read Emails
+                                </button>
+                                <button id="compose-email" class="btn btn-secondary">
+                                    <i class="fas fa-pen"></i>
+                                    Compose
+                                </button>
+                                <button id="categorize-emails" class="btn btn-secondary">
+                                    <i class="fas fa-tags"></i>
+                                    Categorize
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="email-status" id="email-status">
+                            <div class="status-info">
+                                <span>Status: Not configured</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Status Tab -->
+                <div class="tab-content" id="status-tab">
+                    <div class="status-container">
+                        <div class="status-header">
+                            <h2><i class="fas fa-chart-line"></i> System Status</h2>
+                        </div>
+                        
+                        <div class="status-grid">
+                            <div class="status-card">
+                                <h3>System Health</h3>
+                                <div class="health-indicator" id="system-health">
+                                    <div class="health-status">Operational</div>
+                                    <div class="health-details">All systems running normally</div>
+                                </div>
+                            </div>
+                            
+                            <div class="status-card">
+                                <h3>Modules Status</h3>
+                                <div class="modules-status" id="modules-status">
+                                    <!-- Module statuses will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <div class="status-card">
+                                <h3>Performance</h3>
+                                <div class="performance-metrics" id="performance-metrics">
+                                    <!-- Performance metrics will be populated here -->
+                                </div>
+                            </div>
+                            
+                            <div class="status-card">
+                                <h3>Recent Activity</h3>
+                                <div class="activity-log" id="activity-log">
+                                    <!-- Activity log will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div class="tab-content" id="settings-tab">
+                    <div class="settings-container">
+                        <div class="settings-header">
+                            <h2><i class="fas fa-cog"></i> Settings</h2>
+                        </div>
+                        
+                        <div class="settings-sections">
+                            <div class="settings-section">
+                                <h3>General Settings</h3>
+                                <div class="setting-item">
+                                    <label for="owner-name-setting">Owner Name:</label>
+                                    <input type="text" id="owner-name-setting" placeholder="Enter your name">
+                                </div>
+                                <div class="setting-item">
+                                    <label for="theme-setting">Theme:</label>
+                                    <select id="theme-setting">
+                                        <option value="dark">Dark</option>
+                                        <option value="light">Light</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h3>AI Provider Settings</h3>
+                                <div class="setting-item">
+                                    <label for="openai-key">OpenAI API Key:</label>
+                                    <input type="password" id="openai-key" placeholder="sk-...">
+                                </div>
+                                <div class="setting-item">
+                                    <label for="anthropic-key">Anthropic API Key:</label>
+                                    <input type="password" id="anthropic-key" placeholder="sk-ant-...">
+                                </div>
+                            </div>
+                            
+                            <div class="settings-section">
+                                <h3>Notification Settings</h3>
+                                <div class="setting-item">
+                                    <label>
+                                        <input type="checkbox" id="desktop-notifications">
+                                        Enable desktop notifications
+                                    </label>
+                                </div>
+                                <div class="setting-item">
+                                    <label>
+                                        <input type="checkbox" id="sound-notifications">
+                                        Enable sound notifications
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="settings-actions">
+                            <button id="save-settings" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                Save Settings
+                            </button>
+                            <button id="reset-settings" class="btn btn-secondary">
+                                <i class="fas fa-undo"></i>
+                                Reset to Defaults
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-robot fa-spin"></i>
+            <div class="loading-text">Kevin is thinking...</div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.4/socket.io.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

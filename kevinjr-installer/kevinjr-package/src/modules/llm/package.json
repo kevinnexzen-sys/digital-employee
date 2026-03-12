@@ -1,0 +1,52 @@
+{
+  "name": "kevinjr-llm-module",
+  "version": "1.0.0",
+  "description": "Multi-provider LLM integration module for KevinJr",
+  "main": "index.js",
+  "author": "KevinJr Team",
+  "license": "MIT",
+  "capabilities": [
+    "Natural language conversation",
+    "Text completion and generation",
+    "Code generation and analysis",
+    "Text summarization",
+    "Language translation",
+    "Content analysis",
+    "Multi-provider support",
+    "Conversation memory",
+    "Token optimization",
+    "Streaming responses"
+  ],
+  "permissions": [
+    "network:external",
+    "storage:conversations",
+    "config:llm"
+  ],
+  "dependencies": {
+    "axios": "^1.6.0",
+    "winston": "^3.11.0"
+  },
+  "kevinjrDependencies": [],
+  "config": {
+    "preferredProvider": "openai",
+    "maxTokensPerRequest": 4000,
+    "costThreshold": 10.0,
+    "optimizationEnabled": true,
+    "persistenceEnabled": true,
+    "maxConversations": 100,
+    "maxMessages": 50,
+    "systemMessage": "You are KevinJr, an advanced task automation agent and digital companion. Your motto is 'Never says no - always finds a way!' You are helpful, creative, and always try to find solutions to any problem.",
+    "openai": {
+      "model": "gpt-4",
+      "maxTokens": 2000,
+      "temperature": 0.7,
+      "rateLimitDelay": 1000
+    },
+    "anthropic": {
+      "model": "claude-3-sonnet-20240229",
+      "maxTokens": 2000,
+      "temperature": 0.7,
+      "rateLimitDelay": 1000
+    }
+  }
+}
