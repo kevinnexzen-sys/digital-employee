@@ -19,10 +19,12 @@ class Database {
       tasks: [],
       settings: {}
     };
-    this.init();
+    this.initialized = false;
   }
 
-  async init() {
+  async initialize() {
+    if (this.initialized) return;
+    
     try {
       await fs.ensureDir(path.dirname(this.dbPath));
       
@@ -32,8 +34,11 @@ class Database {
       } else {
         await this.save();
       }
+      
+      this.initialized = true;
     } catch (error) {
       console.error('Database init error:', error.message);
+      throw error;
     }
   }
 
@@ -123,4 +128,4 @@ class Database {
   }
 }
 
-export default Database;
+export default new Database();
