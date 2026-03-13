@@ -6,9 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "dev": "nodemon src/index.js",
-    "test": "jest",
-    "lint": "eslint src/"
+    "guardian": "node guardian-agent.js",
+    "test": "node final-system-test.js"
   },
   "keywords": ["ai", "assistant", "automation", "digital-employee"],
   "author": "KevinNexzen",
@@ -18,23 +17,13 @@
     "openai": "^4.28.0",
     "express": "^4.18.2",
     "ws": "^8.16.0",
-    "better-sqlite3": "^9.4.3",
-    "playwright": "^1.42.0",
     "node-cron": "^3.0.3",
     "dotenv": "^16.4.5",
     "winston": "^3.11.0",
-    "tesseract.js": "^5.0.4",
-    "screenshot-desktop": "^1.15.0",
     "fs-extra": "^11.2.0",
     "nodemailer": "^6.9.9",
-    "node-telegram-bot-api": "^0.64.0"
-  },
-  "devDependencies": {
-    "electron": "^29.0.0",
-    "electron-builder": "^24.9.1",
-    "eslint": "^8.56.0",
-    "jest": "^29.7.0",
-    "nodemon": "^3.0.3"
+    "node-telegram-bot-api": "^0.64.0",
+    "axios": "^1.6.7"
   },
   "engines": {
     "node": ">=20.0.0",
