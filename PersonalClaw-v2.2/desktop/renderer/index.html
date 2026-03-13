@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PersonalClaw - Your AI Assistant</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #e0e0e0;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background: #0f0f1e;
+            border-right: 1px solid #2a2a3e;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 1px solid #2a2a3e;
+        }
+
+        .logo h1 {
+            font-size: 24px;
+            color: #00d4ff;
+        }
+
+        .nav {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .nav-item {
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-item:hover {
+            background: #1a1a2e;
+        }
+
+        .nav-item.active {
+            background: #00d4ff20;
+            border-left: 3px solid #00d4ff;
+        }
+
+        .status-bar {
+            padding: 15px 20px;
+            border-top: 1px solid #2a2a3e;
+            font-size: 12px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #00ff00;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            padding: 20px 30px;
+            background: #0f0f1e;
+            border-bottom: 1px solid #2a2a3e;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h2 {
+            color: #00d4ff;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: #00d4ff;
+            color: #0f0f1e;
+        }
+
+        .btn-primary:hover {
+            background: #00b8e6;
+        }
+
+        .btn-secondary {
+            background: #2a2a3e;
+            color: #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: #3a3a4e;
+        }
+
+        .content-area {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        /* Chat Tab */
+        .chat-container {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #16213e;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .message {
+            margin-bottom: 15px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+
+        .message.user {
+            background: #00d4ff20;
+            margin-left: auto;
+            text-align: right;
+        }
+
+        .message.assistant {
+            background: #2a2a3e;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #888;
+            margin-top: 5px;
+        }
+
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-area input {
+            flex: 1;
+            padding: 12px 16px;
+            background: #2a2a3e;
+            border: 1px solid #3a3a4e;
+            border-radius: 8px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+
+        .input-area input:focus {
+            outline: none;
+            border-color: #00d4ff;
+        }
+
+        /* Activity Feed */
+        .activity-feed {
+            background: #16213e;
+            border-radius: 10px;
+            padding: 20px;
+        }
+
+        .activity-item {
+            padding: 12px;
+            background: #2a2a3e;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .activity-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #00d4ff20;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+
+        .activity-details {
+            flex: 1;
+        }
+
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .activity-time {
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* Suggestions */
+        .suggestions {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .suggestion-card {
+            background: #16213e;
+            border-radius: 10px;
+            padding: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 1px solid #2a2a3e;
+        }
+
+        .suggestion-card:hover {
+            transform: translateY(-2px);
+            border-color: #00d4ff;
+            box-shadow: 0 4px 12px rgba(0, 212, 255, 0.2);
+        }
+
+        .suggestion-icon {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .suggestion-title {
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .suggestion-desc {
+            font-size: 13px;
+            color: #aaa;
+        }
+
+        /* Tabs */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #16213e;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #2a2a3e;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #00d4ff;
+            margin-bottom: 8px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="logo">
+                <h1>🦞 PersonalClaw</h1>
+            </div>
+            
+            <div class="nav">
+                <div class="nav-item active" data-tab="chat">
+                    <span>💬</span> Chat
+                </div>
+                <div class="nav-item" data-tab="tasks">
+                    <span>📊</span> Tasks
+                </div>
+                <div class="nav-item" data-tab="automations">
+                    <span>🤖</span> Automations
+                </div>
+                <div class="nav-item" data-tab="watch">
+                    <span>📺</span> Screen Watch
+                </div>
+                <div class="nav-item" data-tab="settings">
+                    <span>⚙️</span> Settings
+                </div>
+            </div>
+
+            <div class="status-bar">
+                <div>
+                    <span class="status-indicator"></span>
+                    <span>Active</span>
+                </div>
+                <div style="margin-top: 8px; font-size: 11px; color: #666;">
+                    Watching: ON
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <div class="header">
+                <h2 id="page-title">Chat</h2>
+                <div class="header-actions">
+                    <button class="btn btn-secondary" onclick="minimizeToTray()">Minimize</button>
+                    <button class="btn btn-primary" onclick="toggleOverlay()">Overlay</button>
+                </div>
+            </div>
+
+            <div class="content-area">
+                <!-- Chat Tab -->
+                <div id="chat" class="tab-content active">
+                    <div class="chat-container">
+                        <div class="messages" id="messages">
+                            <div class="message assistant">
+                                <div>👋 Hello! I'm PersonalClaw, your AI assistant. How can I help you today?</div>
+                                <div class="message-time">Just now</div>
+                            </div>
+                        </div>
+                        <div class="input-area">
+                            <input type="text" id="chat-input" placeholder="Type your message..." onkeypress="handleChatKeyPress(event)">
+                            <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tasks Tab -->
+                <div id="tasks" class="tab-content">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Active Tasks</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Completed Today</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Pending Confirmations</div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 15px;">Recent Activity</h3>
+                    <div class="activity-feed">
+                        <div class="activity-item">
+                            <div class="activity-icon">✅</div>
+                            <div class="activity-details">
+                                <div class="activity-title">System initialized</div>
+                                <div class="activity-time">Just now</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Automations Tab -->
+                <div id="automations" class="tab-content">
+                    <h3 style="margin-bottom: 15px;">💡 Suggested Automations</h3>
+                    <div class="suggestions">
+                        <div class="suggestion-card">
+                            <div class="suggestion-icon">📧</div>
+                            <div class="suggestion-title">Daily Email Summary</div>
+                            <div class="suggestion-desc">Get a summary of your emails every morning at 9 AM</div>
+                            <button class="btn btn-primary" style="margin-top: 15px; width: 100%;">Create</button>
+                        </div>
+                        <div class="suggestion-card">
+                            <div class="suggestion-icon">💾</div>
+                            <div class="suggestion-title">Auto-Backup Documents</div>
+                            <div class="suggestion-desc">Automatically backup your Documents folder daily</div>
+                            <button class="btn btn-primary" style="margin-top: 15px; width: 100%;">Create</button>
+                        </div>
+                        <div class="suggestion-card">
+                            <div class="suggestion-icon">📊</div>
+                            <div class="suggestion-title">Weekly Report</div>
+                            <div class="suggestion-desc">Generate weekly activity report every Friday</div>
+                            <button class="btn btn-primary" style="margin-top: 15px; width: 100%;">Create</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Screen Watch Tab -->
+                <div id="watch" class="tab-content">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Patterns Detected</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Screenshots Captured</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Actions Tracked</div>
+                        </div>
+                    </div>
+
+                    <h3 style="margin-bottom: 15px;">Screen Watching Status</h3>
+                    <div class="activity-feed">
+                        <div class="activity-item">
+                            <div class="activity-icon">👁️</div>
+                            <div class="activity-details">
+                                <div class="activity-title">Screen watching is active</div>
+                                <div class="activity-time">Monitoring for patterns...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="settings" class="tab-content">
+                    <h3 style="margin-bottom: 20px;">Settings</h3>
+                    <div style="background: #16213e; border-radius: 10px; padding: 20px;">
+                        <p>Settings panel coming soon...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        // Tab switching
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const tab = item.dataset.tab;
+                
+                // Update active nav item
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                
+                // Update active tab content
+                document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+                document.getElementById(tab).classList.add('active');
+                
+                // Update page title
+                document.getElementById('page-title').textContent = item.textContent.trim();
+            });
+        });
+
+        // Chat functionality
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, 'user');
+            
+            // Clear input
+            input.value = '';
+            
+            // Simulate AI response (will be replaced with actual LLM integration)
+            setTimeout(() => {
+                addMessage('I received your message: "' + message + '". Full AI integration coming soon!', 'assistant');
+            }, 1000);
+        }
+
+        function addMessage(text, type) {
+            const messagesDiv = document.getElementById('messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const now = new Date();
+            const time = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.innerHTML = `
+                <div>${text}</div>
+                <div class="message-time">${time}</div>
+            `;
+            
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        }
+
+        // Window controls
+        function minimizeToTray() {
+            ipcRenderer.send('minimize-to-tray');
+        }
+
+        function toggleOverlay() {
+            ipcRenderer.send('toggle-overlay');
+        }
+
+        // Listen for IPC messages
+        ipcRenderer.on('toggle-screen-watch', (event, enabled) => {
+            console.log('Screen watch toggled:', enabled);
+        });
+
+        ipcRenderer.on('pause-agent', (event, duration) => {
+            console.log('Agent paused for:', duration);
+        });
+
+        ipcRenderer.on('show-settings', () => {
+            document.querySelector('[data-tab="settings"]').click();
+        });
+
+        // Initialize
+        console.log('PersonalClaw Desktop UI loaded');
+    </script>
+</body>
+</html>
