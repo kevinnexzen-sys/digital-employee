@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PersonalClaw Overlay</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: transparent;
+            -webkit-app-region: drag;
+        }
+
+        .overlay-container {
+            width: 300px;
+            background: rgba(15, 15, 30, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .overlay-header {
+            padding: 15px;
+            background: rgba(0, 212, 255, 0.1);
+            border-bottom: 1px solid rgba(0, 212, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            -webkit-app-region: drag;
+        }
+
+        .overlay-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #00d4ff;
+        }
+
+        .overlay-close {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(255, 0, 0, 0.2);
+            border: none;
+            color: #ff4444;
+            cursor: pointer;
+            font-size: 12px;
+            -webkit-app-region: no-drag;
+        }
+
+        .overlay-close:hover {
+            background: rgba(255, 0, 0, 0.4);
+        }
+
+        .overlay-content {
+            padding: 15px;
+            color: #e0e0e0;
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(42, 42, 62, 0.5);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .status-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(0, 212, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .status-text {
+            flex: 1;
+            font-size: 12px;
+        }
+
+        .status-label {
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+
+        .status-value {
+            color: #aaa;
+            font-size: 11px;
+        }
+
+        .suggestion-box {
+            background: rgba(0, 212, 255, 0.1);
+            border: 1px solid rgba(0, 212, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+
+        .suggestion-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: #00d4ff;
+            margin-bottom: 8px;
+        }
+
+        .suggestion-text {
+            font-size: 11px;
+            color: #e0e0e0;
+            margin-bottom: 10px;
+        }
+
+        .suggestion-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 5px;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s;
+            -webkit-app-region: no-drag;
+        }
+
+        .btn-primary {
+            background: #00d4ff;
+            color: #0f0f1e;
+        }
+
+        .btn-primary:hover {
+            background: #00b8e6;
+        }
+
+        .btn-secondary {
+            background: rgba(42, 42, 62, 0.8);
+            color: #e0e0e0;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(58, 58, 78, 0.8);
+        }
+
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay-container">
+        <div class="overlay-header">
+            <div class="overlay-title">🦞 PersonalClaw</div>
+            <button class="overlay-close" onclick="closeOverlay()">×</button>
+        </div>
+
+        <div class="overlay-content">
+            <div class="status-item">
+                <div class="status-icon pulse">👁️</div>
+                <div class="status-text">
+                    <div class="status-label">Watching</div>
+                    <div class="status-value">Monitoring screen...</div>
+                </div>
+            </div>
+
+            <div class="status-item">
+                <div class="status-icon">📊</div>
+                <div class="status-text">
+                    <div class="status-label">Patterns</div>
+                    <div class="status-value">0 detected</div>
+                </div>
+            </div>
+
+            <div id="suggestion-container">
+                <!-- Suggestions will appear here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const { ipcRenderer } = require('electron');
+
+        function closeOverlay() {
+            ipcRenderer.send('toggle-overlay');
+        }
+
+        function showSuggestion(title, text) {
+            const container = document.getElementById('suggestion-container');
+            container.innerHTML = `
+                <div class="suggestion-box">
+                    <div class="suggestion-title">💡 ${title}</div>
+                    <div class="suggestion-text">${text}</div>
+                    <div class="suggestion-actions">
+                        <button class="btn btn-primary" onclick="acceptSuggestion()">Create</button>
+                        <button class="btn btn-secondary" onclick="dismissSuggestion()">Later</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function acceptSuggestion() {
+            console.log('Suggestion accepted');
+            dismissSuggestion();
+        }
+
+        function dismissSuggestion() {
+            document.getElementById('suggestion-container').innerHTML = '';
+        }
+
+        // Example: Show a suggestion after 5 seconds
+        setTimeout(() => {
+            showSuggestion(
+                'Automation Detected',
+                'You\'ve copied data to Excel 3 times. Create automation?'
+            );
+        }, 5000);
+
+        console.log('PersonalClaw Overlay loaded');
+    </script>
+</body>
+</html>

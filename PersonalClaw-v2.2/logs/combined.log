@@ -1,0 +1,48 @@
+2026-03-13T12:34:50.310Z [INFO] [LLMProvider] Anthropic initialized
+2026-03-13T12:34:51.092Z [INFO] [VectorSearch] Vector search initialized
+2026-03-13T12:34:51.092Z [INFO] [Database] Database tables created
+2026-03-13T12:34:50.284Z [WARN] [FinancialBlocker] 🔒 Financial Blocker initialized - ALL financial access BLOCKED
+2026-03-13T12:34:51.094Z [INFO] [SpeechToText] Initializing Speech-to-Text...
+2026-03-13T12:34:51.094Z [INFO] [TextToSpeech] Initializing Text-to-Speech...
+2026-03-13T12:34:51.093Z [INFO] [VoiceInterface] Initializing Voice Interface...
+2026-03-13T12:34:51.094Z [INFO] [Email] Initializing Email Integration...
+2026-03-13T12:34:51.094Z [INFO] [Calendar] Initializing Calendar Integration...
+2026-03-13T12:34:51.093Z [INFO] [Scheduler] Scheduler started
+2026-03-13T12:34:51.093Z [ERROR] [AutomationManager] Failed to load automations: database.getDb is not a function {"stack":"TypeError: database.getDb is not a function\n    at AutomationManager.loadAutomations (file:///tmp/PersonalClaw-Fixed/src/automation/automation-manager.js:30:33)\n    at AutomationManager.initialize (file:///tmp/PersonalClaw-Fixed/src/automation/automation-manager.js:22:16)\n    at PersonalClaw.initializeComponents (file:///tmp/PersonalClaw-Fixed/src/index.js:87:29)\n    at async PersonalClaw.start (file:///tmp/PersonalClaw-Fixed/src/index.js:32:7)"}
+2026-03-13T12:34:51.086Z [INFO] [Main] 🦞 Starting PersonalClaw...
+2026-03-13T12:34:50.311Z [INFO] [LLMProvider] OpenAI initialized
+2026-03-13T12:34:51.092Z [INFO] [Database] Database initialized successfully
+2026-03-13T12:34:51.092Z [INFO] [Database] Vector search enabled
+2026-03-13T12:34:50.286Z [WARN] [FinancialBlocker] ⚠️  This security layer CANNOT be disabled
+2026-03-13T12:34:51.094Z [INFO] [SpeechToText] Speech-to-Text initialized
+2026-03-13T12:34:51.094Z [WARN] [TextToSpeech] ElevenLabs API key not configured
+2026-03-13T12:34:51.094Z [INFO] [VoiceInterface] Voice Interface initialized
+2026-03-13T12:34:51.094Z [INFO] [Email] Email Integration initialized
+2026-03-13T12:34:51.094Z [INFO] [Calendar] Calendar Integration initialized
+2026-03-13T12:34:51.093Z [INFO] [AutomationManager] Automation Manager initialized
+2026-03-13T12:34:51.086Z [INFO] [Main]    Version: 1.0.0
+2026-03-13T12:34:51.087Z [INFO] [Main]    Environment: undefined
+2026-03-13T12:34:51.087Z [INFO] [Main] 
+2026-03-13T12:34:51.087Z [INFO] [Main] ✓ Financial Blocker initialized
+2026-03-13T12:34:51.087Z [INFO] [Main] ✓ LLM Provider initialized
+2026-03-13T12:34:51.088Z [INFO] [Main] ✓ Agent Executor initialized
+2026-03-13T12:34:51.088Z [INFO] [Main] ✓ Browser Automation ready
+2026-03-13T12:34:51.088Z [INFO] [Main] ✓ File Operations ready
+2026-03-13T12:34:51.092Z [INFO] [Main] ✓ Memory Database initialized
+2026-03-13T12:34:51.093Z [INFO] [Main] ✓ Automation System initialized
+2026-03-13T12:34:51.094Z [INFO] [Main] ✓ Voice Interface initialized
+2026-03-13T12:34:51.094Z [INFO] [Main] ✓ Email Integration initialized
+2026-03-13T12:34:51.094Z [INFO] [Main] ✓ Calendar Integration initialized
+2026-03-13T12:34:51.094Z [INFO] [Main] ✅ PersonalClaw started successfully!
+2026-03-13T12:34:51.094Z [INFO] [Main] 
+2026-03-13T12:34:51.094Z [INFO] [Main] 📊 Status:
+2026-03-13T12:34:51.095Z [INFO] [Main]    Gateway: http://undefined:undefined
+2026-03-13T12:34:51.095Z [INFO] [Main]    Financial Blocker: ACTIVE
+2026-03-13T12:34:51.095Z [INFO] [Main]    Screen Watcher: DISABLED
+2026-03-13T12:34:51.095Z [INFO] [Main]    Telegram: NOT CONFIGURED
+2026-03-13T12:34:51.095Z [INFO] [Main]    Voice Interface: READY
+2026-03-13T12:34:51.095Z [INFO] [Main]    Browser Automation: READY
+2026-03-13T12:34:51.095Z [INFO] [Main]    Memory Database: READY
+2026-03-13T12:34:51.095Z [INFO] [Main]    Automation System: READY
+2026-03-13T12:34:51.095Z [INFO] [Main] 
+2026-03-13T12:34:51.095Z [INFO] [Main] Press Ctrl+C to stop
