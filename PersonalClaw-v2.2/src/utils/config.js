@@ -61,7 +61,7 @@ const config = {
 
   // Screen Watch
   screenWatch: {
-    enabled: process.env.SCREEN_WATCH_ENABLED === 'true',
+    enabled: true,
     interval: parseInt(process.env.SCREEN_WATCH_INTERVAL) || 5000
   },
 
