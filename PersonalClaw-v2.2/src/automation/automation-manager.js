@@ -27,14 +27,14 @@ class AutomationManager {
 
   async loadAutomations() {
     try {
-      const db = await database.getDb();
-      const automations = db.prepare('SELECT * FROM automations WHERE enabled = 1').all();
+      // Use JSON API instead of SQL
+      const automations = await database.getAutomations(true); // Get enabled only
 
       for (const auto of automations) {
         try {
-          // Parse trigger and action from database
-          const trigger = JSON.parse(auto.trigger);
-          const action = JSON.parse(auto.action);
+          // Parse trigger and action if they're strings
+          const trigger = typeof auto.trigger === 'string' ? JSON.parse(auto.trigger) : auto.trigger;
+          const action = typeof auto.action === 'string' ? JSON.parse(auto.action) : auto.action;
 
           // Recreate automation based on type
           if (trigger.type === 'schedule') {
@@ -52,7 +52,7 @@ class AutomationManager {
         }
       }
     } catch (error) {
-      logger.error('Failed to load automations:', error);
+      logger.error('Failed to load automations:', error.message);
     }
   }
 
@@ -96,14 +96,14 @@ class AutomationManager {
 
   async createAutomation(name, trigger, action) {
     try {
-      const db = await database.getDb();
-      
-      // Save to database using EXISTING columns
-      const result = db.prepare(
-        'INSERT INTO automations (name, trigger, action, enabled) VALUES (?, ?, ?, 1)'
-      ).run(name, JSON.stringify(trigger), JSON.stringify(action));
+      // Save to database using JSON API
+      const automation = await database.saveAutomation({
+        name,
+        trigger,
+        action
+      });
 
-      const id = result.lastInsertRowid;
+      const id = automation.id;
 
       // Create runtime automation
       if (trigger.type === 'schedule') {
@@ -138,9 +138,8 @@ class AutomationManager {
         emailTriggers.unregisterTrigger(id);
       }
 
-      // Remove from database
-      const db = await database.getDb();
-      db.prepare('DELETE FROM automations WHERE id = ?').run(id);
+      // Remove from database using JSON API
+      await database.deleteAutomation(id);
 
       this.automations.delete(id);
       logger.info(`Deleted automation: ${id}`);
@@ -153,14 +152,12 @@ class AutomationManager {
   }
 
   async enableAutomation(id) {
-    const db = await database.getDb();
-    db.prepare('UPDATE automations SET enabled = 1 WHERE id = ?').run(id);
+    await database.updateAutomation(id, { enabled: true });
     logger.info(`Enabled automation: ${id}`);
   }
 
   async disableAutomation(id) {
-    const db = await database.getDb();
-    db.prepare('UPDATE automations SET enabled = 0 WHERE id = ?').run(id);
+    await database.updateAutomation(id, { enabled: false });
     logger.info(`Disabled automation: ${id}`);
   }
 

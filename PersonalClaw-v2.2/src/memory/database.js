@@ -17,6 +17,7 @@ class Database {
       conversations: [],
       memories: [],
       tasks: [],
+      automations: [],
       settings: {}
     };
     this.initialized = false;
@@ -31,6 +32,10 @@ class Database {
       if (await fs.pathExists(this.dbPath)) {
         const content = await fs.readFile(this.dbPath, 'utf-8');
         this.data = JSON.parse(content);
+        // Ensure automations array exists
+        if (!this.data.automations) {
+          this.data.automations = [];
+        }
       } else {
         await this.save();
       }
@@ -106,6 +111,38 @@ class Database {
     }
   }
 
+  // Automations
+  async saveAutomation(automation) {
+    this.data.automations.push({
+      id: Date.now(),
+      timestamp: new Date().toISOString(),
+      enabled: true,
+      ...automation
+    });
+    await this.save();
+    return this.data.automations[this.data.automations.length - 1];
+  }
+
+  async getAutomations(enabledOnly = false) {
+    if (enabledOnly) {
+      return this.data.automations.filter(a => a.enabled);
+    }
+    return this.data.automations;
+  }
+
+  async updateAutomation(id, updates) {
+    const automation = this.data.automations.find(a => a.id === id);
+    if (automation) {
+      Object.assign(automation, updates);
+      await this.save();
+    }
+  }
+
+  async deleteAutomation(id) {
+    this.data.automations = this.data.automations.filter(a => a.id !== id);
+    await this.save();
+  }
+
   // Settings
   async saveSetting(key, value) {
     this.data.settings[key] = value;
@@ -122,9 +159,15 @@ class Database {
       conversations: [],
       memories: [],
       tasks: [],
+      automations: [],
       settings: {}
     };
     await this.save();
+  }
+
+  // Close (for compatibility)
+  close() {
+    // JSON-based storage doesn't need closing
   }
 }
 

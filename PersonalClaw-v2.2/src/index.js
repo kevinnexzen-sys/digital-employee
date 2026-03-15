@@ -14,6 +14,7 @@ import voiceInterface from './voice/voice-interface.js';
 import email from './integrations/email.js';
 import calendar from './integrations/calendar.js';
 import automationManager from './automation/automation-manager.js';
+import gatewayServer from './gateway/server.js';
 
 const logger = createLogger('Main');
 
@@ -25,8 +26,8 @@ class PersonalClaw {
   async start() {
     try {
       logger.info('🦞 Starting PersonalClaw...');
-      logger.info(`   Version: 1.0.0`);
-      logger.info(`   Environment: ${config.nodeEnv}`);
+      logger.info(`   Version: 2.2.0`);
+      logger.info(`   Environment: ${process.env.NODE_ENV || 'development'}`);
       logger.info('');
 
       await this.initializeComponents();
@@ -35,7 +36,7 @@ class PersonalClaw {
       logger.info('✅ PersonalClaw started successfully!');
       logger.info('');
       logger.info('📊 Status:');
-      logger.info(`   Gateway: http://${config.host}:${config.port}`);
+      logger.info(`   Gateway: http://${config.server.host}:${config.server.port}`);
       logger.info(`   Financial Blocker: ACTIVE`);
       logger.info(`   Screen Watcher: ${config.screenWatch.enabled ? 'ENABLED' : 'DISABLED'}`);
       logger.info(`   Telegram: ${config.telegram.botToken ? 'CONFIGURED' : 'NOT CONFIGURED'}`);
@@ -98,6 +99,10 @@ class PersonalClaw {
     // Calendar integration
     await calendar.initialize();
     logger.info('✓ Calendar Integration initialized');
+
+    // Gateway server
+    await gatewayServer.start();
+    logger.info('✓ Gateway Server started');
   }
 
   async stop() {
@@ -112,6 +117,7 @@ class PersonalClaw {
     await browser.close();
     database.close();
     voiceInterface.stopListening();
+    await gatewayServer.stop();
 
     this.isRunning = false;
     logger.info('PersonalClaw stopped');
