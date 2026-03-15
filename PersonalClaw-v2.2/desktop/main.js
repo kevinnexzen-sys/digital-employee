@@ -1,18 +1,41 @@
 const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain } = require('electron');
 const path = require('path');
+const fs = require('fs');
 const { spawn } = require('child_process');
 
 let mainWindow = null;
+let setupWindow = null;
 let tray = null;
 let overlayWindow = null;
 let gatewayProcess = null;
 
 const isDev = process.env.NODE_ENV === 'development';
+const envPath = path.join(__dirname, '..', '.env');
 
-const config = {
-  port: process.env.PORT || 18789,
-  host: process.env.HOST || '127.0.0.1'
-};
+function checkEnvExists() {
+  return fs.existsSync(envPath);
+}
+
+function createSetupWindow() {
+  setupWindow = new BrowserWindow({
+    width: 800,
+    height: 900,
+    resizable: false,
+    frame: true,
+    webPreferences: {
+      contextIsolation: true,
+      nodeIntegration: false,
+      preload: path.join(__dirname, 'preload.js')
+    },
+    backgroundColor: '#667eea'
+  });
+
+  setupWindow.loadFile(path.join(__dirname, 'renderer', 'setup.html'));
+
+  setupWindow.on('closed', () => {
+    setupWindow = null;
+  });
+}
 
 function createMainWindow() {
   mainWindow = new BrowserWindow({
@@ -22,17 +45,10 @@ function createMainWindow() {
     minHeight: 600,
     icon: path.join(__dirname, 'assets', 'icon.png'),
     webPreferences: {
-      // SECURITY: Enable context isolation
       contextIsolation: true,
-      // SECURITY: Disable node integration
       nodeIntegration: false,
-      // SECURITY: Disable remote module
-      enableRemoteModule: false,
-      // SECURITY: Use preload script
       preload: path.join(__dirname, 'preload.js'),
-      // SECURITY: Disable web security in dev only
       webSecurity: !isDev,
-      // SECURITY: Sandbox
       sandbox: true
     },
     show: false,
@@ -44,6 +60,7 @@ function createMainWindow() {
 
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+    startGatewayServer();
   });
 
   mainWindow.on('close', (event) => {
@@ -53,119 +70,35 @@ function createMainWindow() {
     }
   });
 
-  // SECURITY: Prevent navigation to external sites
-  mainWindow.webContents.on('will-navigate', (event, url) => {
-    if (!url.startsWith('file://')) {
-      event.preventDefault();
-    }
+  mainWindow.on('closed', () => {
+    mainWindow = null;
   });
 
-  // SECURITY: Prevent opening new windows
-  mainWindow.webContents.setWindowOpenHandler(() => {
-    return { action: 'deny' };
-  });
-
-  if (isDev) {
-    mainWindow.webContents.openDevTools();
-  }
-
-  return mainWindow;
-}
-
-function createOverlayWindow() {
-  overlayWindow = new BrowserWindow({
-    width: 300,
-    height: 400,
-    frame: false,
-    transparent: true,
-    alwaysOnTop: true,
-    skipTaskbar: true,
-    resizable: false,
-    webPreferences: {
-      contextIsolation: true,
-      nodeIntegration: false,
-      enableRemoteModule: false,
-      preload: path.join(__dirname, 'preload.js'),
-      sandbox: true
-    },
-    show: false
-  });
-
-  overlayWindow.loadFile(path.join(__dirname, 'renderer', 'overlay.html'));
-
-  const { screen } = require('electron');
-  const primaryDisplay = screen.getPrimaryDisplay();
-  const { width, height } = primaryDisplay.workAreaSize;
-  
-  overlayWindow.setPosition(width - 320, height - 420);
-
-  return overlayWindow;
+  createTray();
 }
 
 function createTray() {
-  const iconPath = path.join(__dirname, 'assets', 'tray-icon.png');
+  const iconPath = path.join(__dirname, 'assets', 'icon.png');
   tray = new Tray(iconPath);
 
   const contextMenu = Menu.buildFromTemplate([
-    { label: '🦞 PersonalClaw', enabled: false },
-    { type: 'separator' },
-    { label: '🟢 Status: Active', enabled: false },
-    { type: 'separator' },
     {
-      label: '💬 Open Chat',
+      label: 'Show PersonalClaw',
       click: () => {
         if (mainWindow) {
           mainWindow.show();
-          mainWindow.focus();
-        } else {
-          createMainWindow();
         }
       }
     },
     {
-      label: '📺 Screen Watch',
-      type: 'checkbox',
-      checked: true,
-      click: (menuItem) => {
-        if (mainWindow) {
-          mainWindow.webContents.send('toggle-screen-watch', menuItem.checked);
-        }
-      }
-    },
-    {
-      label: '🔕 Pause for 1 hour',
+      label: 'Settings',
       click: () => {
-        if (mainWindow) {
-          mainWindow.webContents.send('pause-agent', 3600000);
-        }
+        // TODO: Open settings page
       }
     },
     { type: 'separator' },
     {
-      label: '📊 Dashboard',
-      click: () => {
-        require('electron').shell.openExternal(`http://${config.host}:${config.port}`);
-      }
-    },
-    {
-      label: '⚙️ Settings',
-      click: () => {
-        if (mainWindow) {
-          mainWindow.show();
-          mainWindow.webContents.send('show-settings');
-        }
-      }
-    },
-    {
-      label: '📖 View Logs',
-      click: () => {
-        const logsPath = path.join(__dirname, '..', 'logs');
-        require('electron').shell.openPath(logsPath);
-      }
-    },
-    { type: 'separator' },
-    {
-      label: '🚪 Exit',
+      label: 'Quit',
       click: () => {
         app.isQuitting = true;
         app.quit();
@@ -173,61 +106,24 @@ function createTray() {
     }
   ]);
 
-  tray.setToolTip('PersonalClaw - Your AI Assistant');
+  tray.setToolTip('PersonalClaw AI Assistant');
   tray.setContextMenu(contextMenu);
 
-  tray.on('double-click', () => {
+  tray.on('click', () => {
     if (mainWindow) {
-      mainWindow.show();
-      mainWindow.focus();
-    } else {
-      createMainWindow();
-    }
-  });
-
-  return tray;
-}
-
-function registerGlobalShortcuts() {
-  globalShortcut.register('CommandOrControl+Alt+C', () => {
-    if (mainWindow) {
-      if (mainWindow.isVisible()) {
-        mainWindow.hide();
-      } else {
-        mainWindow.show();
-        mainWindow.focus();
-      }
-    } else {
-      createMainWindow();
-    }
-  });
-
-  globalShortcut.register('CommandOrControl+Alt+P', () => {
-    if (mainWindow) {
-      mainWindow.webContents.send('toggle-pause');
-    }
-  });
-
-  globalShortcut.register('CommandOrControl+Alt+O', () => {
-    if (overlayWindow) {
-      if (overlayWindow.isVisible()) {
-        overlayWindow.hide();
-      } else {
-        overlayWindow.show();
-      }
-    } else {
-      createOverlayWindow();
-      overlayWindow.show();
+      mainWindow.isVisible() ? mainWindow.hide() : mainWindow.show();
     }
   });
 }
 
 function startGatewayServer() {
-  const serverPath = path.join(__dirname, '..', 'src', 'gateway', 'server.js');
+  if (gatewayProcess) return;
+
+  const serverPath = path.join(__dirname, '..', 'src', 'index.js');
   
   gatewayProcess = spawn('node', [serverPath], {
     cwd: path.join(__dirname, '..'),
-    env: { ...process.env, NODE_ENV: 'production' }
+    env: { ...process.env }
   });
 
   gatewayProcess.stdout.on('data', (data) => {
@@ -240,75 +136,138 @@ function startGatewayServer() {
 
   gatewayProcess.on('close', (code) => {
     console.log(`Gateway process exited with code ${code}`);
+    gatewayProcess = null;
   });
 }
 
 // IPC Handlers
-ipcMain.on('minimize-to-tray', () => {
-  if (mainWindow) {
-    mainWindow.hide();
+ipcMain.handle('save-config', async (event, config) => {
+  try {
+    // Convert config object to .env format
+    const envContent = Object.entries(config)
+      .map(([key, value]) => `${key}=${value}`)
+      .join('\n');
+
+    fs.writeFileSync(envPath, envContent, 'utf8');
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
   }
 });
 
-ipcMain.on('toggle-overlay', () => {
-  if (overlayWindow) {
-    if (overlayWindow.isVisible()) {
-      overlayWindow.hide();
-    } else {
-      overlayWindow.show();
+ipcMain.handle('skip-setup', async () => {
+  // Create empty .env file
+  fs.writeFileSync(envPath, '# PersonalClaw Configuration\n# Add your API keys here\n', 'utf8');
+  
+  if (setupWindow) {
+    setupWindow.close();
+  }
+  createMainWindow();
+  return { success: true };
+});
+
+ipcMain.handle('start-app', async () => {
+  if (setupWindow) {
+    setupWindow.close();
+  }
+  createMainWindow();
+  return { success: true };
+});
+
+ipcMain.handle('get-config', async () => {
+  try {
+    if (!fs.existsSync(envPath)) {
+      return { success: true, config: {} };
     }
-  } else {
-    createOverlayWindow();
-    overlayWindow.show();
+
+    const envContent = fs.readFileSync(envPath, 'utf8');
+    const config = {};
+
+    envContent.split('\n').forEach(line => {
+      line = line.trim();
+      if (line && !line.startsWith('#')) {
+        const [key, ...valueParts] = line.split('=');
+        if (key) {
+          config[key.trim()] = valueParts.join('=').trim();
+        }
+      }
+    });
+
+    return { success: true, config };
+  } catch (error) {
+    return { success: false, error: error.message };
   }
 });
 
-ipcMain.on('send-notification', (event, { title, body }) => {
-  const { Notification } = require('electron');
-  new Notification({ title, body }).show();
+ipcMain.handle('update-config', async (event, newConfig) => {
+  try {
+    const envContent = Object.entries(newConfig)
+      .map(([key, value]) => `${key}=${value}`)
+      .join('\n');
+
+    fs.writeFileSync(envPath, envContent, 'utf8');
+
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
 });
 
-ipcMain.handle('get-config', () => {
-  return config;
+ipcMain.handle('minimize', () => {
+  if (mainWindow) mainWindow.minimize();
+});
+
+ipcMain.handle('maximize', () => {
+  if (mainWindow) {
+    if (mainWindow.isMaximized()) {
+      mainWindow.unmaximize();
+    } else {
+      mainWindow.maximize();
+    }
+  }
+});
+
+ipcMain.handle('close', () => {
+  if (mainWindow) mainWindow.close();
 });
 
 // App lifecycle
 app.whenReady().then(() => {
-  console.log('🦞 PersonalClaw Desktop starting (SECURE MODE)...');
+  // Check if .env exists
+  if (checkEnvExists()) {
+    createMainWindow();
+  } else {
+    createSetupWindow();
+  }
 
-  startGatewayServer();
-  createMainWindow();
-  createOverlayWindow();
-  createTray();
-  registerGlobalShortcuts();
-
-  console.log('✅ PersonalClaw Desktop ready (SECURE)!');
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      if (checkEnvExists()) {
+        createMainWindow();
+      } else {
+        createSetupWindow();
+      }
+    }
+  });
 });
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
-    // Keep running
-  }
-});
-
-app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
-    createMainWindow();
+    app.quit();
   }
 });
 
 app.on('before-quit', () => {
   app.isQuitting = true;
   
+  // Kill gateway process
   if (gatewayProcess) {
     gatewayProcess.kill();
   }
 });
 
 app.on('will-quit', () => {
+  // Unregister all shortcuts
   globalShortcut.unregisterAll();
-});
-
-process.on('uncaughtException', (error) => {
-  console.error('Uncaught exception:', error);
 });

@@ -1,34 +1,26 @@
-// SECURE PRELOAD SCRIPT - Electron Security Best Practice
 const { contextBridge, ipcRenderer } = require('electron');
 
-// Expose ONLY safe, specific APIs to renderer
+// Expose protected methods that allow the renderer process to use
+// the ipcRenderer without exposing the entire object
 contextBridge.exposeInMainWorld('electronAPI', {
-  // Window controls
-  minimizeToTray: () => ipcRenderer.send('minimize-to-tray'),
-  toggleOverlay: () => ipcRenderer.send('toggle-overlay'),
+  // Setup wizard
+  saveConfig: (config) => ipcRenderer.invoke('save-config', config),
+  skipSetup: () => ipcRenderer.invoke('skip-setup'),
+  startApp: () => ipcRenderer.invoke('start-app'),
+  
+  // Settings
+  getConfig: () => ipcRenderer.invoke('get-config'),
+  updateConfig: (config) => ipcRenderer.invoke('update-config', config),
+  
+  // Gateway communication
+  sendMessage: (message) => ipcRenderer.invoke('send-message', message),
+  onMessage: (callback) => ipcRenderer.on('message', (event, data) => callback(data)),
+  
+  // System
+  minimize: () => ipcRenderer.invoke('minimize'),
+  maximize: () => ipcRenderer.invoke('maximize'),
+  close: () => ipcRenderer.invoke('close'),
   
   // Notifications
-  sendNotification: (title, body) => ipcRenderer.send('send-notification', { title, body }),
-  
-  // Configuration
-  getConfig: () => ipcRenderer.invoke('get-config'),
-  
-  // Event listeners (one-way, safe)
-  onToggleScreenWatch: (callback) => {
-    ipcRenderer.on('toggle-screen-watch', (event, enabled) => callback(enabled));
-  },
-  onPauseAgent: (callback) => {
-    ipcRenderer.on('pause-agent', (event, duration) => callback(duration));
-  },
-  onShowSettings: (callback) => {
-    ipcRenderer.on('show-settings', () => callback());
-  },
-  
-  // Remove listeners
-  removeAllListeners: (channel) => {
-    ipcRenderer.removeAllListeners(channel);
-  }
+  onNotification: (callback) => ipcRenderer.on('notification', (event, data) => callback(data))
 });
-
-// Log that preload is loaded
-console.log('✅ Secure preload script loaded');

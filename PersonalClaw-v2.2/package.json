@@ -5,14 +5,19 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "electron desktop/main.js",
     "desktop": "electron desktop/main.js",
     "build": "electron-builder",
     "build-win": "electron-builder --win",
     "guardian": "node guardian-agent.js",
     "test": "node final-system-test.js"
   },
-  "keywords": ["ai", "assistant", "automation", "digital-employee"],
+  "keywords": [
+    "ai",
+    "assistant",
+    "automation",
+    "digital-employee"
+  ],
   "author": "KevinNexzen",
   "license": "MIT",
   "dependencies": {
