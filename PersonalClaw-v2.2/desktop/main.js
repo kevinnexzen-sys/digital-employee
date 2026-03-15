@@ -2,6 +2,7 @@ const { app, BrowserWindow, Tray, Menu, globalShortcut, ipcMain } = require('ele
 const path = require('path');
 const fs = require('fs');
 const { spawn } = require('child_process');
+const { setupSettingsIPC } = require('./settings-ipc.js');
 
 let mainWindow = null;
 let setupWindow = null;
@@ -234,6 +235,7 @@ ipcMain.handle('close', () => {
 
 // App lifecycle
 app.whenReady().then(() => {
+  setupSettingsIPC();
   // Check if .env exists
   if (checkEnvExists()) {
     createMainWindow();

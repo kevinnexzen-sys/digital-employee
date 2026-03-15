@@ -2,7 +2,7 @@
   "name": "personalclaw",
   "version": "2.2.0",
   "description": "PersonalClaw - AI Digital Employee Assistant",
-  "main": "src/index.js",
+  "main": "desktop/main.js",
   "type": "module",
   "scripts": {
     "start": "electron desktop/main.js",
@@ -44,5 +44,30 @@
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"
+  },
+  "build": {
+    "appId": "com.personalclaw.app",
+    "productName": "PersonalClaw",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "desktop/**/*",
+      "src/**/*",
+      "package.json",
+      ".env.example"
+    ],
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "desktop/assets/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }
