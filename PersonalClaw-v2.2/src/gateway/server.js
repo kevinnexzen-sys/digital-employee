@@ -14,6 +14,7 @@ class GatewayServer {
     this.wss = new WebSocketServer({ server: this.server });
     this.clients = new Map();
     this.sessions = new Map();
+    this.isRunning = false;
     
     this.setupMiddleware();
     this.setupRoutes();
@@ -53,7 +54,7 @@ class GatewayServer {
     this.app.get('/api/status', (req, res) => {
       res.json({
         status: 'running',
-        version: '1.0.0',
+        version: '2.2.0',
         clients: this.clients.size,
         sessions: this.sessions.size,
         uptime: process.uptime(),
@@ -100,11 +101,6 @@ class GatewayServer {
         res.status(500).json({ error: error.message });
       }
     });
-
-    // 404 handler
-    this.app.use((req, res) => {
-      res.status(404).json({ error: 'Not found' });
-    });
   }
 
   setupWebSocket() {
@@ -113,146 +109,91 @@ class GatewayServer {
       this.clients.set(clientId, ws);
       
       logger.info(`Client connected: ${clientId}`);
-      logger.info(`Total clients: ${this.clients.size}`);
-
-      // Send welcome message
-      ws.send(JSON.stringify({
-        type: 'welcome',
-        data: {
-          clientId,
-          message: 'Connected to PersonalClaw Gateway',
-          timestamp: new Date().toISOString()
-        }
-      }));
-
-      // Handle messages
-      ws.on('message', async (data) => {
+      
+      ws.on('message', (data) => {
         try {
           const message = JSON.parse(data.toString());
-          await this.handleMessage(clientId, message, ws);
+          this.handleMessage(clientId, message);
         } catch (error) {
-          logger.error(`Error handling message from ${clientId}:`, error);
-          ws.send(JSON.stringify({
-            type: 'error',
-            data: { error: error.message }
-          }));
+          logger.error('Error parsing message:', error);
+          ws.send(JSON.stringify({ error: 'Invalid message format' }));
         }
       });
-
-      // Handle disconnect
+      
       ws.on('close', () => {
         this.clients.delete(clientId);
         logger.info(`Client disconnected: ${clientId}`);
-        logger.info(`Total clients: ${this.clients.size}`);
       });
-
-      // Handle errors
+      
       ws.on('error', (error) => {
-        logger.error(`WebSocket error for ${clientId}:`, error);
+        logger.error(`WebSocket error for client ${clientId}:`, error);
       });
-    });
-  }
-
-  async handleMessage(clientId, message, ws) {
-    const { type, data } = message;
-
-    logger.info(`Message from ${clientId}: ${type}`);
-
-    switch (type) {
-      case 'ping':
-        ws.send(JSON.stringify({ type: 'pong', data: { timestamp: new Date().toISOString() } }));
-        break;
-
-      case 'chat':
-        // Handle chat message
-        await this.handleChatMessage(clientId, data, ws);
-        break;
-
-      case 'command':
-        // Handle command
-        await this.handleCommand(clientId, data, ws);
-        break;
-
-      case 'status':
-        // Send status
-        ws.send(JSON.stringify({
-          type: 'status',
-          data: {
-            clients: this.clients.size,
-            sessions: this.sessions.size,
-            uptime: process.uptime()
-          }
-        }));
-        break;
-
-      default:
-        ws.send(JSON.stringify({
-          type: 'error',
-          data: { error: `Unknown message type: ${type}` }
-        }));
-    }
-  }
-
-  async handleChatMessage(clientId, data, ws) {
-    const { message } = data;
-    
-    logger.info(`Chat message from ${clientId}: ${message}`);
-
-    // Echo back for now (will integrate with LLM later)
-    ws.send(JSON.stringify({
-      type: 'chat_response',
-      data: {
-        message: `Received: ${message}`,
+      
+      // Send welcome message
+      ws.send(JSON.stringify({
+        type: 'connected',
+        clientId,
         timestamp: new Date().toISOString()
-      }
-    }));
-  }
-
-  async handleCommand(clientId, data, ws) {
-    const { command, params } = data;
-    
-    logger.info(`Command from ${clientId}: ${command}`);
-
-    // Handle commands
-    switch (command) {
-      case 'get_stats':
-        const stats = financialBlocker.getStatistics();
-        ws.send(JSON.stringify({
-          type: 'command_response',
-          data: { command, result: stats }
-        }));
-        break;
-
-      default:
-        ws.send(JSON.stringify({
-          type: 'command_response',
-          data: { command, error: 'Unknown command' }
-        }));
-    }
+      }));
+    });
   }
 
   setupFinancialBlocker() {
-    // Register alert callback
-    financialBlocker.onBlocked((attempt) => {
-      logger.warn('Financial access blocked:', attempt);
+    // Integrate financial blocker with all routes
+    this.app.use((req, res, next) => {
+      const url = req.url;
+      const method = req.method;
       
-      // Broadcast to all clients
-      this.broadcast({
-        type: 'security_alert',
-        data: {
-          alert: 'Financial access blocked',
-          attempt,
-          timestamp: new Date().toISOString()
-        }
-      });
+      if (financialBlocker.shouldBlock(url)) {
+        const attempt = {
+          url,
+          method,
+          timestamp: new Date().toISOString(),
+          ip: req.ip
+        };
+        
+        financialBlocker.logBlockedAttempt(attempt);
+        
+        return res.status(403).json({
+          error: 'Access Denied',
+          message: 'Financial operations are blocked for security',
+          blocked: true
+        });
+      }
+      
+      next();
     });
   }
 
-  broadcast(message) {
-    const data = JSON.stringify(message);
-    this.clients.forEach((ws) => {
-      if (ws.readyState === 1) { // OPEN
-        ws.send(data);
+  handleMessage(clientId, message) {
+    logger.info(`Message from ${clientId}:`, message);
+    
+    switch (message.type) {
+      case 'ping':
+        this.sendToClient(clientId, { type: 'pong', timestamp: new Date().toISOString() });
+        break;
+        
+      case 'broadcast':
+        this.broadcast({ type: 'message', data: message.data, from: clientId });
+        break;
+        
+      default:
+        logger.warn(`Unknown message type: ${message.type}`);
+    }
+  }
+
+  sendToClient(clientId, data) {
+    const client = this.clients.get(clientId);
+    if (client && client.readyState === 1) { // OPEN
+      client.send(JSON.stringify(data));
+    }
+  }
+
+  broadcast(data) {
+    const message = JSON.stringify(data);
+    this.clients.forEach((client) => {
+      if (client.readyState === 1) { // OPEN
+        client.send(message);
       }
     });
   }
@@ -262,37 +203,56 @@ class GatewayServer {
   }
 
   start() {
-    this.server.listen(config.port, config.host, () => {
-      logger.info(`🦞 PersonalClaw Gateway started`);
-      logger.info(`   HTTP: http://${config.host}:${config.port}`);
-      logger.info(`   WebSocket: ws://${config.host}:${config.port}`);
-      logger.info(`   Environment: ${config.nodeEnv}`);
-      logger.info(`   Financial Blocker: ACTIVE (cannot be disabled)`);
+    return new Promise((resolve, reject) => {
+      if (this.isRunning) {
+        logger.warn('Gateway server is already running');
+        return resolve();
+      }
+
+      const port = config.port || 18789;
+      const host = config.host || '127.0.0.1';
+
+      this.server.listen(port, host, (err) => {
+        if (err) {
+          logger.error('Failed to start gateway server:', err);
+          return reject(err);
+        }
+
+        this.isRunning = true;
+        
+        logger.info(`🦞 PersonalClaw Gateway started`);
+        logger.info(`   HTTP: http://${host}:${port}`);
+        logger.info(`   WebSocket: ws://${host}:${port}`);
+        logger.info(`   Environment: ${config.nodeEnv}`);
+        logger.info(`   Financial Blocker: ACTIVE (cannot be disabled)`);
+        
+        resolve();
+      });
     });
   }
 
   stop() {
-    logger.info('Shutting down gateway...');
-    this.wss.close();
-    this.server.close();
+    return new Promise((resolve) => {
+      if (!this.isRunning) {
+        return resolve();
+      }
+
+      logger.info('Stopping gateway server...');
+      
+      // Close all WebSocket connections
+      this.clients.forEach((client) => {
+        client.close();
+      });
+      this.clients.clear();
+      
+      // Close HTTP server
+      this.server.close(() => {
+        this.isRunning = false;
+        logger.info('Gateway server stopped');
+        resolve();
+      });
+    });
   }
 }
-
-// Create and start server
-const gateway = new GatewayServer();
-gateway.start();
-
-// Handle shutdown
-process.on('SIGINT', () => {
-  logger.info('Received SIGINT, shutting down gracefully...');
-  gateway.stop();
-  process.exit(0);
-});
-
-process.on('SIGTERM', () => {
-  logger.info('Received SIGTERM, shutting down gracefully...');
-  gateway.stop();
-  process.exit(0);
-});
 
 export default GatewayServer;
