@@ -46,3 +46,42 @@
 2026-03-13T12:34:51.095Z [INFO] [Main]    Automation System: READY
 2026-03-13T12:34:51.095Z [INFO] [Main] 
 2026-03-13T12:34:51.095Z [INFO] [Main] Press Ctrl+C to stop
+2026-03-15T10:42:51.788Z [WARN] [FinancialBlocker] 🔒 Financial Blocker initialized - ALL financial access BLOCKED
+2026-03-15T10:42:51.813Z [WARN] [LLMProvider] Anthropic API key not found
+2026-03-15T10:42:52.704Z [INFO] [ScreenWatcher] Screen Watcher initialized (Smart Mode - On-Demand Only)
+2026-03-15T10:42:52.699Z [INFO] [Gateway] 🦞 PersonalClaw Gateway started
+2026-03-15T10:42:52.696Z [INFO] [Main] 🦞 Starting PersonalClaw...
+2026-03-15T10:42:51.791Z [WARN] [FinancialBlocker] ⚠️  This security layer CANNOT be disabled
+2026-03-15T10:42:52.704Z [INFO] [ScreenWatcher] ✅ Screen Watcher started (Smart Mode - On-Demand Only)
+2026-03-15T10:42:52.704Z [INFO] [ScreenWatcher]    Screenshots will be taken only when:
+2026-03-15T10:42:52.704Z [INFO] [ScreenWatcher]    - Asking for permission (Telegram)
+2026-03-15T10:42:52.704Z [INFO] [ScreenWatcher]    - Before executing actions
+2026-03-15T10:42:52.704Z [INFO] [ScreenWatcher]    - On manual request
+2026-03-15T10:42:51.814Z [WARN] [LLMProvider] OpenAI API key not found
+2026-03-15T10:42:51.814Z [INFO] [LLMProvider] Ollama configured at http://localhost:11434
+2026-03-15T10:42:51.814Z [WARN] [LLMProvider] Gemini API key not found
+2026-03-15T10:42:52.699Z [INFO] [Gateway]    HTTP: http://undefined:undefined
+2026-03-15T10:42:52.700Z [INFO] [Gateway]    WebSocket: ws://undefined:undefined
+2026-03-15T10:42:52.700Z [INFO] [Gateway]    Environment: undefined
+2026-03-15T10:42:52.700Z [INFO] [Gateway]    Financial Blocker: ACTIVE (cannot be disabled)
+2026-03-15T10:42:52.697Z [INFO] [Main]    Version: 2.2.0
+2026-03-15T10:42:52.697Z [INFO] [Main]    Environment: development
+2026-03-15T10:42:52.697Z [INFO] [Main] 
+2026-03-15T10:42:52.698Z [INFO] [Main] ✓ Financial Blocker initialized
+2026-03-15T10:42:52.698Z [INFO] [Main] ✓ LLM Provider initialized
+2026-03-15T10:42:52.698Z [INFO] [Main] ✓ Agent Executor initialized
+2026-03-15T10:42:52.704Z [INFO] [Main] ✓ Screen Watcher started
+2026-03-15T10:42:52.704Z [INFO] [Main] ✓ Browser Automation ready
+2026-03-15T10:42:52.704Z [INFO] [Main] ✓ File Operations ready
+2026-03-15T10:42:52.818Z [INFO] [Main] ✓ Memory Database initialized
+2026-03-15T10:42:52.818Z [INFO] [Scheduler] Scheduler started
+2026-03-15T10:42:52.819Z [INFO] [AutomationManager] Automation Manager initialized
+2026-03-15T10:42:52.819Z [INFO] [VoiceInterface] Initializing Voice Interface...
+2026-03-15T10:42:52.819Z [INFO] [SpeechToText] Initializing Speech-to-Text...
+2026-03-15T10:42:52.820Z [INFO] [TextToSpeech] Initializing Text-to-Speech...
+2026-03-15T10:42:52.820Z [INFO] [Email] Initializing Email Integration...
+2026-03-15T10:42:52.820Z [INFO] [Calendar] Initializing Calendar Integration...
+2026-03-15T10:43:11.644Z [WARN] [LLMProvider] Anthropic API key not found
+2026-03-15T10:43:11.646Z [WARN] [LLMProvider] OpenAI API key not found
+2026-03-15T10:43:11.647Z [INFO] [LLMProvider] Ollama configured at http://localhost:11434
+2026-03-15T10:43:11.647Z [WARN] [LLMProvider] Gemini API key not found

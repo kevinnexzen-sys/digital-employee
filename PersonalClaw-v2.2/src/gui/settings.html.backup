@@ -46,8 +46,6 @@
 
         .content {
             padding: 30px;
-            max-height: 70vh;
-            overflow-y: auto;
         }
 
         .section {
@@ -91,7 +89,6 @@
 
         .form-group input[type="text"],
         .form-group input[type="password"],
-        .form-group input[type="number"],
         .form-group select {
             width: 100%;
             padding: 12px 15px;
@@ -138,10 +135,6 @@
             display: flex;
             gap: 15px;
             margin-top: 30px;
-            position: sticky;
-            bottom: 0;
-            background: white;
-            padding: 20px 0;
         }
 
         .btn {
@@ -237,6 +230,21 @@
             flex: 1;
         }
 
+        .loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
         .help-text {
             background: #f8f9fa;
             padding: 15px;
@@ -275,8 +283,6 @@
                     <select id="llmProvider">
                         <option value="anthropic">Anthropic (Claude)</option>
                         <option value="openai">OpenAI (GPT-4)</option>
-                        <option value="gemini">Google Gemini</option>
-                        <option value="ollama">Ollama (Local)</option>
                     </select>
                 </div>
 
@@ -296,21 +302,6 @@
                         <button class="btn btn-test" onclick="testApiKey('openai')">Test</button>
                     </div>
                     <small>Get your API key from <a href="https://platform.openai.com/api-keys" target="_blank">platform.openai.com</a></small>
-                </div>
-
-                <div class="form-group">
-                    <label for="geminiApiKey">Google Gemini API Key</label>
-                    <div class="input-with-button">
-                        <input type="password" id="geminiApiKey" placeholder="AIza...">
-                        <button class="btn btn-test" onclick="testApiKey('gemini')">Test</button>
-                    </div>
-                    <small>Get your API key from <a href="https://makersuite.google.com/app/apikey" target="_blank">Google AI Studio</a></small>
-                </div>
-
-                <div class="form-group">
-                    <label for="ollamaUrl">Ollama URL (Local AI)</label>
-                    <input type="text" id="ollamaUrl" placeholder="http://localhost:11434">
-                    <small>Run Ollama locally for free AI models</small>
                 </div>
             </div>
 
@@ -341,39 +332,6 @@
                 <div class="form-group">
                     <label for="bingApiKey">Bing Search API Key (Optional)</label>
                     <input type="password" id="bingApiKey" placeholder="...">
-                </div>
-            </div>
-
-            <!-- Email Configuration Section -->
-            <div class="section">
-                <h2 class="section-title">📧 Email Configuration</h2>
-                
-                <div class="form-group">
-                    <label for="emailHost">SMTP Host</label>
-                    <input type="text" id="emailHost" placeholder="smtp.gmail.com">
-                    <small>Your email provider's SMTP server</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="emailPort">SMTP Port</label>
-                    <input type="number" id="emailPort" placeholder="587">
-                    <small>Usually 587 for TLS or 465 for SSL</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="emailUser">Email Username</label>
-                    <input type="text" id="emailUser" placeholder="your-email@gmail.com">
-                </div>
-
-                <div class="form-group">
-                    <label for="emailPassword">Email Password</label>
-                    <input type="password" id="emailPassword" placeholder="App-specific password">
-                    <small>Use app-specific password for Gmail</small>
-                </div>
-
-                <div class="form-group">
-                    <label for="emailFrom">From Address</label>
-                    <input type="text" id="emailFrom" placeholder="PersonalClaw <your-email@gmail.com>">
                 </div>
             </div>
 
@@ -468,48 +426,32 @@
 
         async function loadSettings() {
             try {
-                const result = await window.electronAPI.loadSettings();
-                
-                if (!result.success) {
-                    showAlert('Failed to load settings: ' + result.error, 'error');
-                    return;
-                }
-
-                const settings = result.settings || {};
+                const settings = await window.electronAPI.loadSettings();
                 
                 // AI Providers
-                document.getElementById('llmProvider').value = settings.llmProvider || 'anthropic';
-                document.getElementById('anthropicApiKey').value = settings.anthropicApiKey || '';
-                document.getElementById('openaiApiKey').value = settings.openaiApiKey || '';
-                document.getElementById('geminiApiKey').value = settings.geminiApiKey || '';
-                document.getElementById('ollamaUrl').value = settings.ollamaUrl || 'http://localhost:11434';
+                document.getElementById('llmProvider').value = settings.llmProvider;
+                document.getElementById('anthropicApiKey').value = settings.anthropicApiKey;
+                document.getElementById('openaiApiKey').value = settings.openaiApiKey;
                 
                 // Search
-                document.getElementById('searchProvider').value = settings.searchProvider || 'tavily';
-                document.getElementById('tavilyApiKey').value = settings.tavilyApiKey || '';
-                document.getElementById('serpApiKey').value = settings.serpApiKey || '';
-                document.getElementById('bingApiKey').value = settings.bingApiKey || '';
-                
-                // Email
-                document.getElementById('emailHost').value = settings.emailHost || '';
-                document.getElementById('emailPort').value = settings.emailPort || '587';
-                document.getElementById('emailUser').value = settings.emailUser || '';
-                document.getElementById('emailPassword').value = settings.emailPassword || '';
-                document.getElementById('emailFrom').value = settings.emailFrom || '';
+                document.getElementById('searchProvider').value = settings.searchProvider;
+                document.getElementById('tavilyApiKey').value = settings.tavilyApiKey;
+                document.getElementById('serpApiKey').value = settings.serpApiKey;
+                document.getElementById('bingApiKey').value = settings.bingApiKey;
                 
                 // Integrations
-                document.getElementById('telegramBotToken').value = settings.telegramBotToken || '';
-                document.getElementById('telegramChatId').value = settings.telegramChatId || '';
-                document.getElementById('elevenlabsApiKey').value = settings.elevenlabsApiKey || '';
+                document.getElementById('telegramBotToken').value = settings.telegramBotToken;
+                document.getElementById('telegramChatId').value = settings.telegramChatId;
+                document.getElementById('elevenlabsApiKey').value = settings.elevenlabsApiKey;
                 
                 // Server
-                document.getElementById('port').value = settings.port || '18789';
-                document.getElementById('host').value = settings.host || '127.0.0.1';
-                document.getElementById('logLevel').value = settings.logLevel || 'info';
+                document.getElementById('port').value = settings.port;
+                document.getElementById('host').value = settings.host;
+                document.getElementById('logLevel').value = settings.logLevel;
                 
                 // Features
-                document.getElementById('screenWatchEnabled').checked = settings.screenWatchEnabled === 'true';
-                document.getElementById('browserHeadless').checked = settings.browserHeadless === 'true';
+                document.getElementById('screenWatchEnabled').checked = settings.screenWatchEnabled;
+                document.getElementById('browserHeadless').checked = settings.browserHeadless;
                 
                 showAlert('Settings loaded successfully!', 'success');
             } catch (error) {
@@ -524,21 +466,12 @@
                     llmProvider: document.getElementById('llmProvider').value,
                     anthropicApiKey: document.getElementById('anthropicApiKey').value,
                     openaiApiKey: document.getElementById('openaiApiKey').value,
-                    geminiApiKey: document.getElementById('geminiApiKey').value,
-                    ollamaUrl: document.getElementById('ollamaUrl').value,
                     
                     // Search
                     searchProvider: document.getElementById('searchProvider').value,
                     tavilyApiKey: document.getElementById('tavilyApiKey').value,
                     serpApiKey: document.getElementById('serpApiKey').value,
                     bingApiKey: document.getElementById('bingApiKey').value,
-                    
-                    // Email
-                    emailHost: document.getElementById('emailHost').value,
-                    emailPort: document.getElementById('emailPort').value,
-                    emailUser: document.getElementById('emailUser').value,
-                    emailPassword: document.getElementById('emailPassword').value,
-                    emailFrom: document.getElementById('emailFrom').value,
                     
                     // Integrations
                     telegramBotToken: document.getElementById('telegramBotToken').value,
@@ -551,9 +484,9 @@
                     logLevel: document.getElementById('logLevel').value,
                     
                     // Features
-                    screenWatchEnabled: document.getElementById('screenWatchEnabled').checked.toString(),
-                    browserHeadless: document.getElementById('browserHeadless').checked.toString(),
-                    financialBlocker: 'true'
+                    screenWatchEnabled: document.getElementById('screenWatchEnabled').checked,
+                    browserHeadless: document.getElementById('browserHeadless').checked,
+                    financialBlocker: true
                 };
 
                 const result = await window.electronAPI.saveSettings(settings);

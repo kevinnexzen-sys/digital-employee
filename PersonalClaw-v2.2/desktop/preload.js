@@ -6,11 +6,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
   skipSetup: () => ipcRenderer.invoke('skip-setup'),
   startApp: () => ipcRenderer.invoke('start-app'),
   
-  // Settings
+  // Settings - FIXED with proper handlers
   getConfig: () => ipcRenderer.invoke('get-config'),
   updateConfig: (config) => ipcRenderer.invoke('update-config', config),
   loadSettings: () => ipcRenderer.invoke('loadSettings'),
   saveSettings: (settings) => ipcRenderer.invoke('saveSettings', settings),
+  testApiKey: (data) => ipcRenderer.invoke('testApiKey', data),
   
   // Gateway communication
   sendMessage: (message) => ipcRenderer.invoke('send-message', message),
