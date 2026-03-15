@@ -1,36 +1,31 @@
-import Database from 'better-sqlite3';
 import { createLogger } from '../utils/logger.js';
 import config from '../utils/config.js';
+import database from './database.js';
 
 const logger = createLogger('VectorSearch');
 
 class VectorSearch {
   constructor() {
-    this.db = null;
+    this.embeddings = [];
     this.embeddingCache = new Map();
+    this.initialized = false;
   }
 
-  async initialize(db) {
-    this.db = db;
+  async initialize() {
+    if (this.initialized) return;
     
-    // Create vector search tables
-    this.db.exec(`
-      CREATE TABLE IF NOT EXISTS embeddings (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        content_type TEXT NOT NULL,
-        content_id INTEGER NOT NULL,
-        embedding BLOB NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-        UNIQUE(content_type, content_id)
-      )
-    `);
+    // Load embeddings from database
+    const stored = await database.getSetting('embeddings');
+    if (stored) {
+      this.embeddings = stored;
+    }
+    
+    this.initialized = true;
+    logger.info('Vector search initialized (JSON-based)');
+  }
 
-    this.db.exec(`
-      CREATE INDEX IF NOT EXISTS idx_embeddings_type 
-      ON embeddings(content_type)
-    `);
-
-    logger.info('Vector search initialized');
+  async save() {
+    await database.saveSetting('embeddings', this.embeddings);
   }
 
   async generateEmbedding(text) {
@@ -61,7 +56,7 @@ class VectorSearch {
 
       return embedding;
     } catch (error) {
-      logger.error('Failed to generate embedding:', error);
+      logger.error('Failed to generate embedding:', error.message);
       return null;
     }
   }
@@ -70,14 +65,21 @@ class VectorSearch {
     const embedding = await this.generateEmbedding(text);
     if (!embedding) return false;
 
-    const embeddingBlob = Buffer.from(new Float32Array(embedding).buffer);
+    // Remove existing embedding for this content
+    this.embeddings = this.embeddings.filter(
+      e => !(e.content_type === contentType && e.content_id === contentId)
+    );
 
-    const stmt = this.db.prepare(`
-      INSERT OR REPLACE INTO embeddings (content_type, content_id, embedding)
-      VALUES (?, ?, ?)
-    `);
+    // Add new embedding
+    this.embeddings.push({
+      id: Date.now(),
+      content_type: contentType,
+      content_id: contentId,
+      embedding: embedding,
+      created_at: new Date().toISOString()
+    });
 
-    stmt.run(contentType, contentId, embeddingBlob);
+    await this.save();
     return true;
   }
 
@@ -99,25 +101,20 @@ class VectorSearch {
     const queryEmbedding = await this.generateEmbedding(query);
     if (!queryEmbedding) return [];
 
-    let sql = 'SELECT * FROM embeddings';
-    const params = [];
+    let results = this.embeddings;
 
+    // Filter by content type if specified
     if (contentType) {
-      sql += ' WHERE content_type = ?';
-      params.push(contentType);
+      results = results.filter(e => e.content_type === contentType);
     }
 
-    const stmt = this.db.prepare(sql);
-    const rows = stmt.all(...params);
-
     // Calculate similarities
-    const results = rows.map(row => {
-      const embedding = new Float32Array(row.embedding.buffer);
-      const similarity = this.cosineSimilarity(queryEmbedding, Array.from(embedding));
+    results = results.map(item => {
+      const similarity = this.cosineSimilarity(queryEmbedding, item.embedding);
 
       return {
-        content_type: row.content_type,
-        content_id: row.content_id,
+        content_type: item.content_type,
+        content_id: item.content_id,
         similarity
       };
     });
@@ -136,21 +133,13 @@ class VectorSearch {
     let keywordResults = [];
     
     if (contentType === 'conversation') {
-      const stmt = this.db.prepare(`
-        SELECT id, message FROM conversations 
-        WHERE message LIKE ? 
-        ORDER BY timestamp DESC 
-        LIMIT ?
-      `);
-      keywordResults = stmt.all(`%${query}%`, limit);
+      const conversations = await database.getConversations(100);
+      keywordResults = conversations
+        .filter(c => JSON.stringify(c).toLowerCase().includes(query.toLowerCase()))
+        .slice(0, limit);
     } else if (contentType === 'memory') {
-      const stmt = this.db.prepare(`
-        SELECT id, content FROM memories 
-        WHERE content LIKE ? 
-        ORDER BY importance DESC 
-        LIMIT ?
-      `);
-      keywordResults = stmt.all(`%${query}%`, limit);
+      const memories = await database.searchMemories(query);
+      keywordResults = memories.slice(0, limit);
     }
 
     // Merge results (vector 60%, keyword 40%)

@@ -284,7 +284,7 @@ class GuardianAgent {
 
     // Check unlock code (you mentioned you have a code)
     // For now, using a placeholder - you can set the real code
-    const validCode = process.env.EMERGENCY_UNLOCK_CODE || 'KEVIN_UNLOCK_2024';
+    const validCode = process.env.EMERGENCY_UNLOCK_CODE;
     
     if (code !== validCode) {
       logger.error('❌ Invalid unlock code');
