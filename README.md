@@ -43,11 +43,9 @@ KevinJr prioritizes your security and privacy:
 - Permission-based access control
 - Audit logging for all actions
 - Always asks before performing sensitive operations
-
-## 🤝 Contributing
+🤝 Contributing
 
 KevinJr is designed to evolve and improve. See our [Contributing Guide](CONTRIBUTING.md) for details.
 
----
 
 *"Never says no - always finds a way"* ✨
